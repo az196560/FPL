@@ -25,10 +25,13 @@ printbig.o, and generate an executable.  See testall.sh for details.
 Tips to test built-in fucntion
 
 Compile external function as object file with gcc (do not use g++, it would casue link error!!!)
+
 $ gcc -o mydraw.o -c mydraw.c -lGL -lGLU -lglut
 
 Compile FPL code into assembly 
+
 $ ./micro.native ./fplTest/test-drawLine.mc | llc > drawLine.S
 
 Link two files
+
 $ gcc -o mydraw mydraw.o drawLine.S -lGL -lGLU -lglut
