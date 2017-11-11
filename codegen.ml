@@ -45,6 +45,14 @@ let translate (globals, functions) =
   let printbig_t = L.function_type i32_t [| i32_t |] in
   let printbig_func = L.declare_function "printbig" printbig_t the_module in
 
+  (* Declare the built-in drawLine() function *)
+  let drawLine_t = L.function_type i32_t [| i32_t |] in
+  let drawLine_func = L.declare_function "drawLine" drawLine_t the_module in
+  
+  (* Declare the built-in drawRec() function *)
+  let drawRec_t = L.function_type i32_t [| i32_t |] in
+  let drawRec_func = L.declare_function "drawRec" drawRec_t the_module in
+  
   (* Define each function (arguments and return type) so we can call it *)
   let function_decls =
     let function_decl m fdecl =
@@ -121,6 +129,10 @@ let translate (globals, functions) =
       | A.Call ("putc", [e])->
 	  L.build_call printf_func [| char_format_str ; (expr builder e) |]
 	    "printf" builder
+      | A.Call ("drawRec", [e]) ->
+	  L.build_call drawRec_func [| (expr builder e) |] "drawRec" builder
+      | A.Call ("drawLine", [e]) ->
+	  L.build_call drawLine_func [| (expr builder e) |] "drawLine" builder
       | A.Call ("printbig", [e]) ->
 	  L.build_call printbig_func [| (expr builder e) |] "printbig" builder
       | A.Call (f, act) ->
