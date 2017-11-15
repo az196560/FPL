@@ -7,10 +7,11 @@ open Ast
 %token SEMI LPAREN RPAREN LBRACE RBRACE COMMA
 %token PLUS MINUS TIMES DIVIDE ASSIGN NOT
 %token EQ NEQ LT LEQ GT GEQ TRUE FALSE AND OR
-%token RETURN IF ELSE FOR WHILE INT BOOL VOID FLOAT
+%token RETURN IF ELSE FOR WHILE INT BOOL VOID FLOAT CHAR
 %token <int> LITERAL
 %token <float> FLOAT_LITERAL
 %token <string> ID
+%token <char> CHAR_LITERAL
 %token EOF
 
 %nonassoc NOELSE
@@ -58,6 +59,7 @@ typ:
   | BOOL { Bool }
   | VOID { Void }
   | FLOAT { Float }
+  | CHAR { Char }
 
 vdecl_list:
     /* nothing */    { [] }
@@ -88,6 +90,7 @@ expr_opt:
 expr:
     LITERAL          { Literal($1) }
   | FLOAT_LITERAL    { FLiteral($1) }
+  | CHAR_LITERAL     { CharLit($1) }
   | TRUE             { BoolLit(true) }
   | FALSE            { BoolLit(false) }
   | ID               { Id($1) }

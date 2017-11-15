@@ -33,6 +33,7 @@ let translate (globals, functions) =
       A.Int -> i32_t
     | A.Bool -> i1_t
     | A.Float -> flt_t
+    | A.Char -> i8_t
     | A.Void -> void_t in
 
     (* Declare ensureInt and ensureFloat function *)
@@ -111,6 +112,7 @@ let translate (globals, functions) =
 	A.Literal i -> L.const_int i32_t i
       | A.BoolLit b -> L.const_int i1_t (if b then 1 else 0)
       | A.FLiteral f -> L.const_float flt_t f
+      | A.CharLit c -> L.const_int i8_t (Char.code c)
       | A.Noexpr -> L.const_int i32_t 0
       | A.Id s -> L.build_load (lookup s) s builder
       | A.Binop (e1, op, e2) ->
@@ -158,14 +160,13 @@ let translate (globals, functions) =
       | A.Assign (s, e) -> let e' = expr builder e in
 	                   ignore (L.build_store e' (lookup s) builder); e'
       | A.Call ("print", [e]) | A.Call ("printb", [e]) ->
-	  L.build_call printf_func [| int_format_str ; (expr builder e) |]
-      "printf" builder
+	  L.build_call printf_func [| int_format_str ; (expr builder e) |] "printf" builder
       | A.Call ("printChar", [e])->
-      L.build_call printf_func [| float_format_str ; (expr builder e) |]
-        "printf" builder
+    L.build_call printf_func [| char_format_str ; (expr builder e) |] "printf" builder
+      | A.Call ("printFloat", [e])->
+    L.build_call printf_func [| float_format_str ; (expr builder e) |] "printf" builder
       | A.Call ("putc", [e])->
-	  L.build_call printf_func [| char_format_str ; (expr builder e) |]
-	    "printf" builder
+	  L.build_call printf_func [| char_format_str ; (expr builder e) |] "printf" builder
       | A.Call ("drawRec", [e]) ->
 	  L.build_call drawRec_func [| (expr builder e) |] "drawRec" builder
       | A.Call ("drawLine", [e]) ->

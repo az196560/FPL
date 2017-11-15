@@ -51,8 +51,10 @@ let check (globals, functions) =
      { typ = Void; fname = "putc"; formals = [(Int, "x")];
        locals = []; body = [] } (StringMap.add "print"
      { typ = Void; fname = "print"; formals = [(Int, "x")];
-     locals = []; body = [] } (StringMap.add "printChar"
-     { typ = Void; fname = "printChar"; formals = [(Float, "x")];
+     locals = []; body = [] } (StringMap.add "printFloat"
+     { typ = Void; fname = "printFloat"; formals = [(Float, "x")];
+       locals = []; body = [] } (StringMap.add "printChar"
+     { typ = Void; fname = "printChar"; formals = [(Char, "x")];
        locals = []; body = [] } (StringMap.add "printb"
      { typ = Void; fname = "printb"; formals = [(Bool, "x")];
        locals = []; body = [] } (StringMap.add "printbig"
@@ -61,7 +63,7 @@ let check (globals, functions) =
      { typ = Void; fname = "drawLine"; formals = [(Int, "x")];
        locals = []; body = [] }  (StringMap.singleton "drawRec"
      { typ = Void; fname = "drawRec"; formals = [(Int, "x")];
-     locals = []; body = [] } ))))))
+     locals = []; body = [] } )))))))
    in
      
   let function_decls = List.fold_left (fun m fd -> StringMap.add fd.fname fd m)
@@ -103,6 +105,7 @@ let check (globals, functions) =
 	    Literal _ -> Int
       | BoolLit _ -> Bool
       | FLiteral _ -> Float
+      | CharLit _ -> Char
       | Id s -> type_of_identifier s
       | Binop(e1, op, e2) as e -> let t1 = expr e1 and t2 = expr e2 in
 	(match op with
