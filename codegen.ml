@@ -69,7 +69,8 @@ let translate (globals, functions) =
     let builder = L.builder_at_end context (L.entry_block the_function) in
 
     let int_format_str = L.build_global_stringptr "%d\n" "fmt" builder in
-    let char_format_str = L.build_global_stringptr "%c" "fmt" builder in
+    let char_format_str = L.build_global_stringptr "%c\n" "fmt" builder in
+    let float_format_str = L.build_global_stringptr "%f\n" "fmt" builder in
     
     (* Construct the function's "locals": formal arguments and locally
        declared variables.  Allocate each on the stack, initialize their
@@ -125,6 +126,9 @@ let translate (globals, functions) =
 	                   ignore (L.build_store e' (lookup s) builder); e'
       | A.Call ("print", [e]) | A.Call ("printb", [e]) ->
 	  L.build_call printf_func [| int_format_str ; (expr builder e) |]
+	    "printf" builder
+      | A.Call ("printChar", [e])->
+	  L.build_call printf_func [| float_format_str ; (expr builder e) |]
 	    "printf" builder
       | A.Call ("putc", [e])->
 	  L.build_call printf_func [| char_format_str ; (expr builder e) |]
