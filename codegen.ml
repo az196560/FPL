@@ -17,6 +17,9 @@ module A = Ast
 
 module StringMap = Map.Make(String)
 
+(* Error message *)
+exception FPL_err of string;;
+
 let translate (globals, functions) =
   let context = L.global_context () in
   let the_module = L.create_module context "MicroC"
@@ -129,6 +132,7 @@ let translate (globals, functions) =
     | A.Leq     -> L.build_fcmp L.Fcmp.Ole
     | A.Greater -> L.build_fcmp L.Fcmp.Ogt
     | A.Geq     -> L.build_fcmp L.Fcmp.Oge
+    | _         -> raise (FPL_err "Invalid operands for operator")
     ) (ensureFloat e1') (ensureFloat e2') "tmp" builder
     else
 	  (match op with
@@ -144,7 +148,7 @@ let translate (globals, functions) =
 	  | A.Leq     -> L.build_icmp L.Icmp.Sle
 	  | A.Greater -> L.build_icmp L.Icmp.Sgt
 	  | A.Geq     -> L.build_icmp L.Icmp.Sge
-    ) e1' e2' "tmp" builder
+    ) (ensureInt e1') (ensureInt e2') "tmp" builder
     
       | A.Unop(op, e) ->
       let e' = expr builder e in
