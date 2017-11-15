@@ -27,6 +27,7 @@ let translate (globals, functions) =
   and i8_t   = L.i8_type   context
   and i1_t   = L.i1_type   context
   and flt_t  = L.float_type context
+  and str_t  = L.pointer_type (L.i8_type context)
   and void_t = L.void_type context in
 
   let ltype_of_typ = function
@@ -34,6 +35,7 @@ let translate (globals, functions) =
     | A.Bool -> i1_t
     | A.Float -> flt_t
     | A.Char -> i8_t
+    | A.String -> str_t
     | A.Void -> void_t in
 
     (* Declare ensureInt and ensureFloat function *)
@@ -84,6 +86,7 @@ let translate (globals, functions) =
     let int_format_str = L.build_global_stringptr "%d\n" "fmt" builder in
     let char_format_str = L.build_global_stringptr "%c\n" "fmt" builder in
     let float_format_str = L.build_global_stringptr "%f\n" "fmt" builder in
+    let str_format_str = L.build_global_stringptr "%s\n" "fmt" builder in
     
     (* Construct the function's "locals": formal arguments and locally
        declared variables.  Allocate each on the stack, initialize their
@@ -113,6 +116,7 @@ let translate (globals, functions) =
       | A.BoolLit b -> L.const_int i1_t (if b then 1 else 0)
       | A.FLiteral f -> L.const_float flt_t f
       | A.CharLit c -> L.const_int i8_t (Char.code c)
+      | A.StringLit s -> L.build_global_stringptr (s^"\x00") "strptr" builder
       | A.Noexpr -> L.const_int i32_t 0
       | A.Id s -> L.build_load (lookup s) s builder
       | A.Binop (e1, op, e2) ->
@@ -163,6 +167,8 @@ let translate (globals, functions) =
 	  L.build_call printf_func [| int_format_str ; (expr builder e) |] "printf" builder
       | A.Call ("printChar", [e])->
     L.build_call printf_func [| char_format_str ; (expr builder e) |] "printf" builder
+      | A.Call ("printS", [e])->
+    L.build_call printf_func [| str_format_str ; (expr builder e) |] "printf" builder
       | A.Call ("printFloat", [e])->
     L.build_call printf_func [| float_format_str ; (expr builder e) |] "printf" builder
       | A.Call ("putc", [e])->

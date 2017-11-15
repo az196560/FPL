@@ -16,6 +16,7 @@ rule token = parse
 | '*'      { TIMES }
 | '/'      { DIVIDE }
 | '='      { ASSIGN }
+| '"'      { read_string (Buffer.create 17) lexbuf }
 | "=="     { EQ }
 | "!="     { NEQ }
 | '<'      { LT }
@@ -34,10 +35,11 @@ rule token = parse
 | "bool"   { BOOL }
 | "float"  { FLOAT }
 | "char"   { CHAR }
+| "string" { STRING }
 | "void"   { VOID }
 | "true"   { TRUE }
 | "false"  { FALSE }
-| '''(_ as mychar)''' { CHAR_LITERAL(mychar) }
+| '''(_ as mychar)''' { CHAR_LITERAL(mychar) } 
 | ['0'-'9']+ as lxm { LITERAL(int_of_string lxm) }
 | ['0'-'9']*'.'['0'-'9']+ | ['0'-'9']+'.'['0'-'9']* as lxm { FLOAT_LITERAL(float_of_string lxm)}
 | ['a'-'z' 'A'-'Z']['a'-'z' 'A'-'Z' '0'-'9' '_']* as lxm { ID(lxm) }
@@ -47,3 +49,24 @@ rule token = parse
 and comment = parse
   "*/" { token lexbuf }
 | _    { comment lexbuf }
+
+(*
+This "read_string" function was borrowed directly from this link
+https://realworldocaml.org/v1/en/html/parsing-with-ocamllex-and-menhir.html
+*)
+and read_string buf =
+  parse
+  | '"'       { STRING_LITERAL (Buffer.contents buf) }
+  | '\\' '/'  { Buffer.add_char buf '/'; read_string buf lexbuf }
+  | '\\' '\\' { Buffer.add_char buf '\\'; read_string buf lexbuf }
+  | '\\' 'b'  { Buffer.add_char buf '\b'; read_string buf lexbuf }
+  | '\\' 'f'  { Buffer.add_char buf '\012'; read_string buf lexbuf }
+  | '\\' 'n'  { Buffer.add_char buf '\n'; read_string buf lexbuf }
+  | '\\' 'r'  { Buffer.add_char buf '\r'; read_string buf lexbuf }
+  | '\\' 't'  { Buffer.add_char buf '\t'; read_string buf lexbuf }
+  | [^ '"' '\\']+
+    { Buffer.add_string buf (Lexing.lexeme lexbuf);
+      read_string buf lexbuf
+    }
+  | _ { raise (Failure ("Illegal string character: " ^ Lexing.lexeme lexbuf)) }
+  | eof { raise (Failure ("String is not terminated")) }
