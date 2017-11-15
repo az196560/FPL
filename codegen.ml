@@ -23,11 +23,13 @@ let translate (globals, functions) =
   and i32_t  = L.i32_type  context
   and i8_t   = L.i8_type   context
   and i1_t   = L.i1_type   context
+  and flt_t  = L.float_type context
   and void_t = L.void_type context in
 
   let ltype_of_typ = function
       A.Int -> i32_t
     | A.Bool -> i1_t
+    | A.Float -> flt_t
     | A.Void -> void_t in
 
   (* Declare each global variable; remember its value in a map *)
@@ -98,6 +100,7 @@ let translate (globals, functions) =
     let rec expr builder = function
 	A.Literal i -> L.const_int i32_t i
       | A.BoolLit b -> L.const_int i1_t (if b then 1 else 0)
+      | A.FLiteral f -> L.const_float flt_t f
       | A.Noexpr -> L.const_int i32_t 0
       | A.Id s -> L.build_load (lookup s) s builder
       | A.Binop (e1, op, e2) ->
@@ -126,10 +129,10 @@ let translate (globals, functions) =
 	                   ignore (L.build_store e' (lookup s) builder); e'
       | A.Call ("print", [e]) | A.Call ("printb", [e]) ->
 	  L.build_call printf_func [| int_format_str ; (expr builder e) |]
-	    "printf" builder
+      "printf" builder
       | A.Call ("printChar", [e])->
-	  L.build_call printf_func [| float_format_str ; (expr builder e) |]
-	    "printf" builder
+      L.build_call printf_func [| float_format_str ; (expr builder e) |]
+        "printf" builder
       | A.Call ("putc", [e])->
 	  L.build_call printf_func [| char_format_str ; (expr builder e) |]
 	    "printf" builder
