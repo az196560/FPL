@@ -32,6 +32,13 @@ let translate (globals, functions) =
     | A.Float -> flt_t
     | A.Void -> void_t in
 
+    (* Declare ensureInt and ensureFloat function *)
+    let ensureInt c = 
+      if L.type_of c = flt_t then (L.const_fptosi c i32_t) else c in
+    
+    let ensureFloat c =
+      if L.type_of c = flt_t then c else (L.const_sitofp c flt_t) in
+
   (* Declare each global variable; remember its value in a map *)
   let global_vars =
     let global_var m (t, n) =
@@ -105,12 +112,30 @@ let translate (globals, functions) =
       | A.Id s -> L.build_load (lookup s) s builder
       | A.Binop (e1, op, e2) ->
 	  let e1' = expr builder e1
-	  and e2' = expr builder e2 in
+    and e2' = expr builder e2 in
+
+    (* Check whether e1 and e2 are float or not.
+       If one of them is float, do float operation.
+       If not, do int operation *)
+    if (L.type_of e1' = flt_t || L.type_of e2' = flt_t) then
+    (match op with
+      A.Add     -> L.build_fadd
+    | A.Sub     -> L.build_fsub
+    | A.Mult    -> L.build_fmul
+    | A.Div     -> L.build_fdiv
+    | A.Equal   -> L.build_fcmp L.Fcmp.Oeq
+    | A.Neq     -> L.build_fcmp L.Fcmp.One
+    | A.Less    -> L.build_fcmp L.Fcmp.Olt
+    | A.Leq     -> L.build_fcmp L.Fcmp.Ole
+    | A.Greater -> L.build_fcmp L.Fcmp.Ogt
+    | A.Geq     -> L.build_fcmp L.Fcmp.Oge
+    ) (ensureFloat e1') (ensureFloat e2') "tmp" builder
+    else
 	  (match op with
 	    A.Add     -> L.build_add
 	  | A.Sub     -> L.build_sub
 	  | A.Mult    -> L.build_mul
-          | A.Div     -> L.build_sdiv
+    | A.Div     -> L.build_sdiv
 	  | A.And     -> L.build_and
 	  | A.Or      -> L.build_or
 	  | A.Equal   -> L.build_icmp L.Icmp.Eq
@@ -119,12 +144,13 @@ let translate (globals, functions) =
 	  | A.Leq     -> L.build_icmp L.Icmp.Sle
 	  | A.Greater -> L.build_icmp L.Icmp.Sgt
 	  | A.Geq     -> L.build_icmp L.Icmp.Sge
-	  ) e1' e2' "tmp" builder
+    ) e1' e2' "tmp" builder
+    
       | A.Unop(op, e) ->
-	  let e' = expr builder e in
-	  (match op with
-	    A.Neg     -> L.build_neg
-          | A.Not     -> L.build_not) e' "tmp" builder
+      let e' = expr builder e in
+      (match op with
+	      A.Neg     -> L.build_neg
+      | A.Not     -> L.build_not) e' "tmp" builder
       | A.Assign (s, e) -> let e' = expr builder e in
 	                   ignore (L.build_store e' (lookup s) builder); e'
       | A.Call ("print", [e]) | A.Call ("printb", [e]) ->
