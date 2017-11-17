@@ -49,7 +49,7 @@ let check (globals, functions) =
   (* Function declaration for a named function *)
   let built_in_decls =  StringMap.add "putc"
      { typ = Void; fname = "putc"; formals = [(Int, "x")];
-       locals = []; body = [] } (StringMap.add "print"
+       locals = []; body = [] }  (StringMap.add "print"
      { typ = Void; fname = "print"; formals = [(Int, "x")];
        locals = []; body = [] } (StringMap.add "printS"
      { typ = Void; fname = "printS"; formals = [(String, "x")];
@@ -102,12 +102,24 @@ let check (globals, functions) =
       with Not_found -> raise (Failure ("undeclared identifier " ^ s))
     in
 
+(* check if given type is an int or float *)
+    let isNumType t = if (t = Int || t = Float) then true else false in
+
     (* Return the type of an expression or throw an exception *)
     let rec expr = function
 	    Literal _ -> Int
       | BoolLit _ -> Bool
       | FLiteral _ -> Float
       | CharLit _ -> Char
+      | Wal(e1,e2,e3,e4)  -> let e1' = expr e1 and e2' = expr e2 and e3' = expr e3 and e4' = expr e4 in
+        if (isNumType(e1') && isNumType(e2') && isNumType(e3') && isNumType(e4') ) then Wall
+         else raise (Failure ("Expected numeric input for type Wall"))
+    | ArrayAccess(e1, e2) -> let e_type = type_of_identifier e1 and e_num = expr e2 in  if (e_type != Wall)
+     then raise (Failure ("Can only access Wall types, not " ^         string_of_typ e_type))
+      else
+    if (e_num != Int) then raise (Failure ("Expecting Integer for access         index, got " ^ string_of_typ e_num))
+    else Int
+
       | StringLit _ -> String
       | Id s -> type_of_identifier s
       | Binop(e1, op, e2) as e -> let t1 = expr e1 and t2 = expr e2 in

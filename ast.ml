@@ -6,7 +6,7 @@ type op = Add | Sub | Mult | Div | Equal | Neq | Less | Leq | Greater | Geq |
 type uop = Neg | Not
 
 
-type typ = Int | Bool | Void | Float | Char | String
+type typ = Int | Bool | Void | Float | Char | String | Wall
 
 type bind = typ * string
 
@@ -15,10 +15,12 @@ type expr =
   | FLiteral of float
   | CharLit of char
   | StringLit of string
-  | BoolLit of bool
+ | ArrayAccess of string * expr 
+ | BoolLit of bool
   | Id of string
   | Binop of expr * op * expr
   | Unop of uop * expr
+  | Wal of expr * expr * expr * expr
   | Assign of string * expr
   | Call of string * expr list
   | Noexpr
@@ -68,10 +70,12 @@ let rec string_of_expr = function
   | StringLit(s) -> s
   | BoolLit(true) -> "true"
   | BoolLit(false) -> "false"
+   | ArrayAccess(e1,e2) -> e1 ^ "[" ^ string_of_expr e2^ "]"
   | Id(s) -> s
   | Binop(e1, o, e2) ->
       string_of_expr e1 ^ " " ^ string_of_op o ^ " " ^ string_of_expr e2
   | Unop(o, e) -> string_of_uop o ^ string_of_expr e
+  | Wal(e1,e2,e3,e4) ->  "(" ^ string_of_expr e1 ^ ", " ^ string_of_expr e2 ^ ", " ^ string_of_expr e3 ^ "," ^ string_of_expr e4 ^  ")"
   | Assign(v, e) -> v ^ " = " ^ string_of_expr e
   | Call(f, el) ->
       f ^ "(" ^ String.concat ", " (List.map string_of_expr el) ^ ")"
@@ -97,6 +101,7 @@ let string_of_typ = function
   | Void -> "void"
   | Char -> "char"
   | String -> "string"
+  | Wall -> "Wall"
 
 let string_of_vdecl (t, id) = string_of_typ t ^ " " ^ id ^ ";\n"
 

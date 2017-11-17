@@ -22,19 +22,23 @@ exception FPL_err of string;;
 
 let translate (globals, functions) =
   let context = L.global_context () in
-  let the_module = L.create_module context "MicroC"
-  and i32_t  = L.i32_type  context
-  and i8_t   = L.i8_type   context
-  and i1_t   = L.i1_type   context
-  and flt_t  = L.float_type context
-  and str_t  = L.pointer_type (L.i8_type context)
-  and void_t = L.void_type context in
+  let the_module = L.create_module context "MicroC" in
+  let i32_t  = L.i32_type  context in 
+  let i8_t   = L.i8_type   context in 
+  let i1_t   = L.i1_type   context in 
+  let flt_t  = L.float_type context in 
+  let str_t  = L.pointer_type (L.i8_type context) in
+  let void_t = L.void_type context in
+
+  let wall_t = L.named_struct_type context "wall_t" in
+  L.struct_set_body wall_t [|i32_t; i32_t; i32_t; i32_t|] false;
 
   let ltype_of_typ = function
       A.Int -> i32_t
     | A.Bool -> i1_t
     | A.Float -> flt_t
     | A.Char -> i8_t
+    | A.Wall -> wall_t
     | A.String -> str_t
     | A.Void -> void_t in
 
@@ -87,7 +91,7 @@ let translate (globals, functions) =
     let char_format_str = L.build_global_stringptr "%c\n" "fmt" builder in
     let float_format_str = L.build_global_stringptr "%f\n" "fmt" builder in
     let str_format_str = L.build_global_stringptr "%s\n" "fmt" builder in
-    
+
     (* Construct the function's "locals": formal arguments and locally
        declared variables.  Allocate each on the stack, initialize their
        value, if appropriate, and remember their values in the "locals" map *)
@@ -155,7 +159,25 @@ let translate (globals, functions) =
 	  | A.Greater -> L.build_icmp L.Icmp.Sgt
 	  | A.Geq     -> L.build_icmp L.Icmp.Sge
     ) (ensureInt e1') (ensureInt e2') "tmp" builder
-    
+       | A.Wal (e1, e2, e3, e4) ->
+          let e1' = ensureInt(expr builder e1) in
+          let e2' = ensureInt(expr builder e2) in
+          let e3' = ensureInt(expr builder e3) in
+          let e4' = ensureInt(expr builder e4) in
+          let wall_ptr = L.build_alloca wall_t "tmp" builder in 
+          let e1_ptr = L.build_struct_gep wall_ptr 0 "e1" builder in
+          ignore (L.build_store e1' e1_ptr builder);
+          let e2_ptr = L.build_struct_gep wall_ptr 1 "e2" builder in
+          ignore (L.build_store e2' e2_ptr builder);
+          let e3_ptr = L.build_struct_gep wall_ptr 2 "e3" builder in
+          ignore (L.build_store e3' e3_ptr builder);
+          let e4_ptr = L.build_struct_gep wall_ptr 3 "e4" builder in
+          ignore (L.build_store e4' e4_ptr builder);
+          L.build_load wall_ptr "c" builder
+      | A.ArrayAccess (e1, e2) ->
+        let arr_ptr =  L.build_gep (lookup e1) [|L.const_int i32_t 0|] "dummy" builder in let ele_ptr = L.build_struct_gep arr_ptr (match e2 with 
+        | A.Literal(i) -> i
+        | _ -> 0)  "el" builder in  L.build_load ele_ptr "ptr" builder;
       | A.Unop(op, e) ->
       let e' = expr builder e in
       (match op with

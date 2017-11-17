@@ -7,6 +7,9 @@ rule token = parse
 | "/*"     { comment lexbuf }           (* Comments *)
 | '('      { LPAREN }
 | ')'      { RPAREN }
+ | '['   { LSQUARE }
+ | ']'   { RSQUARE }
+
 | '{'      { LBRACE }
 | '}'      { RBRACE }
 | ';'      { SEMI }
@@ -35,6 +38,7 @@ rule token = parse
 | "bool"   { BOOL }
 | "float"  { FLOAT }
 | "char"   { CHAR }
+| "Wall"   { WALL}
 | "string" { STRING }
 | "void"   { VOID }
 | "true"   { TRUE }
