@@ -1,4 +1,4 @@
-The MicroC compiler
+The FPL compiler
 
 Coded in OCaml, this takes a highly stripped-down subset of C (ints,
 bools, and void types, arithmetic, if-else, for, and while statements,
@@ -13,10 +13,10 @@ The version of the OCaml llvm library must match the version of the LLVM
 system installed on your system.
 
 In addition to print, which calls the C library function printf(),
-microc gratuitiously includes a primitive function "printbig," which
+fpl gratuitiously includes a primitive function "printbig," which
 prints large ASCII-encoded characters.
 
-The stock C compiler compiles printbig.o.  testall.sh runs the microc
+The stock C compiler compiles printbig.o.  testall.sh runs the fpl
 executable on each testcase (.mc file) to produce a .ll file, invokes
 "llc" (the LLVM compiler) to produce a .s (assembly) file, then
 invokes "cc" (the stock C compiler) to assemble the .s file, link in
@@ -30,7 +30,7 @@ $ gcc -o mydraw.o -c mydraw.c -lGL -lGLU -lglut
 
 Compile FPL code into assembly 
 
-$ ./micro.native ./fplTest/test-drawLine.mc | llc > drawLine.S
+$ ./fpl.native ./fplTest/test-drawLine.mc | llc > drawLine.S
 
 Link two files
 
