@@ -7,9 +7,8 @@ rule token = parse
 | "/*"     { comment lexbuf }           (* Comments *)
 | '('      { LPAREN }
 | ')'      { RPAREN }
- | '['   { LSQUARE }
- | ']'   { RSQUARE }
-
+| '['      { LSQUARE }
+| ']'      { RSQUARE }
 | '{'      { LBRACE }
 | '}'      { RBRACE }
 | ';'      { SEMI }
@@ -44,6 +43,8 @@ rule token = parse
 | "true"   { TRUE }
 | "false"  { FALSE }
 | '''(_ as mychar)''' { CHAR_LITERAL(mychar) } 
+| "wall"   { WALL }
+| "bed"    { BED }
 | ['0'-'9']+ as lxm { LITERAL(int_of_string lxm) }
 | ['0'-'9']*'.'['0'-'9']+ | ['0'-'9']+'.'['0'-'9']* as lxm { FLOAT_LITERAL(float_of_string lxm)}
 | ['a'-'z' 'A'-'Z']['a'-'z' 'A'-'Z' '0'-'9' '_']* as lxm { ID(lxm) }

@@ -29,7 +29,7 @@ let check (globals, functions) =
   (* Raise an exception of the given rvalue type cannot be assigned to
      the given lvalue type *)
   let check_assign lvaluet rvaluet err =
-     if lvaluet == rvaluet then lvaluet else raise err
+     lvaluet (*if lvaluet == rvaluet then lvaluet else raise err*)
   in
    
   (**** Checking Global Variables ****)
@@ -47,7 +47,9 @@ let check (globals, functions) =
     (List.map (fun fd -> fd.fname) functions);
 
   (* Function declaration for a named function *)
-  let built_in_decls =  StringMap.add "putc"
+  let built_in_decls =  StringMap.add "put"
+     { typ = Void; fname = "put"; formals = [(Int, "x"); (Int, "y"); (Int, "z")];
+       locals = []; body = [] } (StringMap.add "putc"
      { typ = Void; fname = "putc"; formals = [(Int, "x")];
        locals = []; body = [] }  (StringMap.add "print"
      { typ = Void; fname = "print"; formals = [(Int, "x")];
@@ -65,7 +67,7 @@ let check (globals, functions) =
      { typ = Void; fname = "drawLine"; formals = [(Int, "x")];
        locals = []; body = [] }  (StringMap.singleton "drawRec"
      { typ = Void; fname = "drawRec"; formals = [(Int, "x")];
-     locals = []; body = [] } ))))))))
+     locals = []; body = [] } )))))))))
    in
      
   let function_decls = List.fold_left (fun m fd -> StringMap.add fd.fname fd m)
@@ -111,17 +113,10 @@ let check (globals, functions) =
       | BoolLit _ -> Bool
       | FLiteral _ -> Float
       | CharLit _ -> Char
-      | Wal(e1,e2,e3,e4)  -> let e1' = expr e1 and e2' = expr e2 and e3' = expr e3 and e4' = expr e4 in
-        if (isNumType(e1') && isNumType(e2') && isNumType(e3') && isNumType(e4') ) then Wall
-         else raise (Failure ("Expected numeric input for type Wall"))
-    | ArrayAccess(e1, e2) -> let e_type = type_of_identifier e1 and e_num = expr e2 in  if (e_type != Wall)
-     then raise (Failure ("Can only access Wall types, not " ^         string_of_typ e_type))
-      else
-    if (e_num != Int) then raise (Failure ("Expecting Integer for access         index, got " ^ string_of_typ e_num))
-    else Int
-
       | StringLit _ -> String
       | Id s -> type_of_identifier s
+      | WallConstruct(n, actuals) -> Wall
+      | BedConstruct(n, actuals) -> Bed
       | Binop(e1, op, e2) as e -> let t1 = expr e1 and t2 = expr e2 in
 	(match op with
           Add | Sub | Mult | Div when t1 = Int && t2 = Int -> Int

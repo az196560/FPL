@@ -84,7 +84,7 @@ Check() {
     reffile=`echo $1 | sed 's/.mc$//'`
     basedir="`echo $1 | sed 's/\/[^\/]*$//'`/."
 
-    echo -n "$basename..."
+    echo -n "$basename...\n"
 
     echo 1>&2
     echo "###### Testing $basename" 1>&2
@@ -94,7 +94,7 @@ Check() {
     generatedfiles="$generatedfiles ${basename}.ll ${basename}.s ${basename}.exe ${basename}.out" &&
     Run "$MICROC" "$1" ">" "${basename}.ll" &&
     Run "$LLC" "${basename}.ll" ">" "${basename}.s" &&
-    Run "$CC" "-o" "${basename}.exe" "${basename}.s" "printbig.o"
+    Run "$CC" "-o" "${basename}.exe" "${basename}.s" "printbig.o" "fplFunctions.o"
     Run "./${basename}.exe"
     #Compare ${basename}.out ${reffile}.out ${basename}.diff
 
@@ -172,11 +172,18 @@ then
     exit 1
 fi
 
+if [ ! -f fplFunctions.o ]
+then
+    echo "Could not find printbig.o"
+    echo "Try \"make printbig.o\""
+    exit 1
+fi
+
 if [ $# -ge 1 ]
 then
     files=$@
 else
-    files="fplTest/*.mc fplTest/*.mc"
+    files="fplTest/*.mc"
     #files="fplTest/*.mc"
 fi
 

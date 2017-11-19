@@ -4,10 +4,11 @@
 open Ast
 %}
 
-%token SEMI LPAREN RPAREN LBRACE RBRACE COMMA
+%token SEMI LPAREN RPAREN LBRACE RBRACE COMMA LSQUARE RSQUARE
 %token PLUS MINUS TIMES DIVIDE ASSIGN NOT
 %token EQ NEQ LT LEQ GT GEQ TRUE FALSE AND OR
 %token RETURN IF ELSE FOR WHILE INT BOOL VOID FLOAT CHAR STRING
+%token WALL WALLCONSTRUCT BED BEDCONSTRUCT
 %token <int> LITERAL
 %token <float> FLOAT_LITERAL
 %token <string> ID
@@ -18,6 +19,8 @@ open Ast
 %nonassoc NOELSE
 %nonassoc ELSE
 %right ASSIGN
+%left WALL 
+%left BED 
 %left OR
 %left AND
 %left EQ NEQ
@@ -62,6 +65,8 @@ typ:
   | FLOAT { Float }
   | CHAR { Char }
   | STRING { String }
+  | WALL { Wall }
+  | BED { Bed }
 
 vdecl_list:
     /* nothing */    { [] }
@@ -97,6 +102,8 @@ expr:
   | TRUE             { BoolLit(true) }
   | FALSE            { BoolLit(false) }
   | ID               { Id($1) }
+  | ID ASSIGN WALL LPAREN actuals_opt RPAREN {WallConstruct($1, $5)}
+  | ID ASSIGN BED LPAREN actuals_opt RPAREN {BedConstruct($1, $5)}
   | expr PLUS   expr { Binop($1, Add,   $3) }
   | expr MINUS  expr { Binop($1, Sub,   $3) }
   | expr TIMES  expr { Binop($1, Mult,  $3) }

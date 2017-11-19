@@ -1,6 +1,6 @@
 int main()
 {
-  putc(72); /* H */
+  putc(104); /* h */
   putc(101); /* e */
   putc(108); /* l */
   putc(108); /* l */

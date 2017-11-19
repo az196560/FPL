@@ -5,7 +5,7 @@
 # Easiest way to build: using ocamlbuild, which in turn uses ocamlfind
 
 .PHONY : all
-all : microc.native printbig.o
+all : microc.native printbig.o fplFunctions.o
 
 .PHONY : microc.native
 microc.native :
@@ -19,6 +19,7 @@ clean :
 	ocamlbuild -clean
 	rm -rf testall.log *.diff microc scanner.ml parser.ml parser.mli
 	rm -rf printbig
+	rm -rf fplFunctions
 	rm -rf *.cmx *.cmi *.cmo *.cmx *.o *.s *.ll *.out *.exe
 
 # More detailed: build using ocamlc/ocamlopt + ocamlfind to locate LLVM
@@ -79,7 +80,7 @@ TESTFILES = $(TESTS:%=test-%.mc) $(TESTS:%=test-%.out) \
 	    $(FAILS:%=fail-%.mc) $(FAILS:%=fail-%.err)
 
 TARFILES = ast.ml codegen.ml Makefile _tags microc.ml parser.mly README \
-        scanner.mll semant.ml testall.sh printbig.c arcade-font.pbm font2c \
+        scanner.mll semant.ml testall.sh printbig.c fplFunctions.c arcade-font.pbm font2c \
 	$(TESTFILES:%=tests/%) 
 
 microc-llvm.tar.gz : $(TARFILES)

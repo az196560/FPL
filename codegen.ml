@@ -20,33 +20,50 @@ module StringMap = Map.Make(String)
 (* Error message *)
 exception FPL_err of string;;
 
+(* global variable *)
+let localsTypeMap = StringMap.empty;;
+let fplObjectValueMap = ref StringMap.empty;;
+
 let translate (globals, functions) =
   let context = L.global_context () in
-  let the_module = L.create_module context "MicroC" in
-  let i32_t  = L.i32_type  context in 
-  let i8_t   = L.i8_type   context in 
-  let i1_t   = L.i1_type   context in 
-  let flt_t  = L.float_type context in 
-  let str_t  = L.pointer_type (L.i8_type context) in
-  let void_t = L.void_type context in
-
-  let wall_t = L.named_struct_type context "wall_t" in
-  L.struct_set_body wall_t [|i32_t; i32_t; i32_t; i32_t|] false;
+  let the_module = L.create_module context "MicroC"
+  and i32_t  = L.i32_type  context
+  and i8_t   = L.i8_type   context
+  and i1_t   = L.i1_type   context
+  and flt_t  = L.float_type context
+  and str_t  = L.pointer_type (L.i8_type context)
+  and void_t = L.void_type context
+  and fplObject_t = L.i16_type context in
 
   let ltype_of_typ = function
       A.Int -> i32_t
     | A.Bool -> i1_t
     | A.Float -> flt_t
     | A.Char -> i8_t
-    | A.Wall -> wall_t
     | A.String -> str_t
-    | A.Void -> void_t in
+    | A.Void -> void_t
+    | A.Wall -> fplObject_t
+    | A.Bed -> fplObject_t in
 
+  (* debug helper *)
+  let rec getMap map = function
+    [] -> map
+    | pair::pairs -> getMap (StringMap.add (snd pair) (fst pair) map) pairs in
+ 
+  let printLocalsTypeMap m =
+      StringMap.iter (fun key value -> Printf.printf "%s -> %s\n" key (A.string_of_typ value)) m in
+ 
+  let printList l =
+      List.iter (fun n -> Printf.printf "%s, " (A.string_of_expr n)) l;  Printf.printf "\n" in
+
+  let print m =
+     StringMap.iter (fun key value -> Printf.printf "%s: " key;  printList value) m in
+    
     (* Declare ensureInt and ensureFloat function *)
-    let ensureInt c = 
+  let ensureInt c = 
       if L.type_of c = flt_t then (L.const_fptosi c i32_t) else c in
     
-    let ensureFloat c =
+  let ensureFloat c =
       if L.type_of c = flt_t then c else (L.const_sitofp c flt_t) in
 
   (* Declare each global variable; remember its value in a map *)
@@ -72,6 +89,14 @@ let translate (globals, functions) =
   let drawRec_t = L.function_type i32_t [| i32_t |] in
   let drawRec_func = L.declare_function "drawRec" drawRec_t the_module in
   
+  (* Declare the built-in put_wall() function *)
+  let put_wall_t = L.function_type i32_t [|i32_t; i32_t; i32_t; i32_t; i32_t; i32_t|] in
+  let put_wall_func = L.declare_function "put_wall" put_wall_t the_module in
+  
+  (* Declare the built-in put_bed() function *)
+  let put_bed_t = L.function_type i32_t [|i32_t; i32_t; i32_t; i32_t; i32_t; i32_t|] in
+  let put_bed_func = L.declare_function "put_bed" put_bed_t the_module in
+
   (* Define each function (arguments and return type) so we can call it *)
   let function_decls =
     let function_decl m fdecl =
@@ -113,6 +138,8 @@ let translate (globals, functions) =
     let lookup n = try StringMap.find n local_vars
                    with Not_found -> StringMap.find n global_vars
     in
+    let localsTypeMap = getMap StringMap.empty fdecl.A.locals in
+    (*printLocalsTypeMap localsTypeMap;*)
 
     (* Construct code for an expression; return its value *)
     let rec expr builder = function
@@ -123,6 +150,10 @@ let translate (globals, functions) =
       | A.StringLit s -> L.build_global_stringptr (s^"\x00") "strptr" builder
       | A.Noexpr -> L.const_int i32_t 0
       | A.Id s -> L.build_load (lookup s) s builder
+      | A.WallConstruct (n, act) | A.BedConstruct (n, act) -> 
+               fplObjectValueMap := StringMap.add n act !fplObjectValueMap;
+              (*print !fplObjectValueMap;*)
+              L.const_int i32_t 0
       | A.Binop (e1, op, e2) ->
 	  let e1' = expr builder e1
     and e2' = expr builder e2 in
@@ -149,7 +180,7 @@ let translate (globals, functions) =
 	    A.Add     -> L.build_add
 	  | A.Sub     -> L.build_sub
 	  | A.Mult    -> L.build_mul
-    | A.Div     -> L.build_sdiv
+      | A.Div     -> L.build_sdiv
 	  | A.And     -> L.build_and
 	  | A.Or      -> L.build_or
 	  | A.Equal   -> L.build_icmp L.Icmp.Eq
@@ -159,21 +190,6 @@ let translate (globals, functions) =
 	  | A.Greater -> L.build_icmp L.Icmp.Sgt
 	  | A.Geq     -> L.build_icmp L.Icmp.Sge
     ) (ensureInt e1') (ensureInt e2') "tmp" builder
-       | A.Wal (e1, e2, e3, e4) ->
-          let e1' = ensureInt(expr builder e1) in
-          let e2' = ensureInt(expr builder e2) in
-          let e3' = ensureInt(expr builder e3) in
-          let e4' = ensureInt(expr builder e4) in
-          let wall_ptr = L.build_alloca wall_t "tmp" builder in 
-          let e1_ptr = L.build_struct_gep wall_ptr 0 "e1" builder in
-          ignore (L.build_store e1' e1_ptr builder);
-          let e2_ptr = L.build_struct_gep wall_ptr 1 "e2" builder in
-          ignore (L.build_store e2' e2_ptr builder);
-          let e3_ptr = L.build_struct_gep wall_ptr 2 "e3" builder in
-          ignore (L.build_store e3' e3_ptr builder);
-          let e4_ptr = L.build_struct_gep wall_ptr 3 "e4" builder in
-          ignore (L.build_store e4' e4_ptr builder);
-          L.build_load wall_ptr "c" builder
       | A.ArrayAccess (e1, e2) ->
         let arr_ptr =  L.build_gep (lookup e1) [|L.const_int i32_t 0|] "dummy" builder in let ele_ptr = L.build_struct_gep arr_ptr (match e2 with 
         | A.Literal(i) -> i
@@ -201,6 +217,23 @@ let translate (globals, functions) =
 	  L.build_call drawLine_func [| (expr builder e) |] "drawLine" builder
       | A.Call ("printbig", [e]) ->
 	  L.build_call printbig_func [| (expr builder e) |] "printbig" builder
+      | A.Call ("put", act) ->
+	 let actuals = List.rev (List.map (expr builder) (List.rev act)) in
+     let fplObject = A.string_of_expr (List.hd act) in 
+     let typ = StringMap.find fplObject localsTypeMap in 
+        if typ = A.Wall  then (
+            let act = List.tl act in
+            let attributes = StringMap.find fplObject !fplObjectValueMap in
+	        let parameters = List.map (expr builder) (attributes@act) in
+            (*printList attributes;*)
+	        L.build_call put_wall_func (Array.of_list parameters) "put_wall" builder)
+        else if typ = A.Bed then (
+            let act = List.tl act in
+            let attributes = StringMap.find fplObject !fplObjectValueMap in
+	        let parameters = List.map (expr builder) (attributes@act) in
+	        L.build_call put_bed_func (Array.of_list parameters) "put_bed" builder)
+        else (
+            L.const_int i32_t 0)
       | A.Call (f, act) ->
          let (fdef, fdecl) = StringMap.find f function_decls in
 	 let actuals = List.rev (List.map (expr builder) (List.rev act)) in
