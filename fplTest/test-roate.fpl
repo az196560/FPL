@@ -1,0 +1,11 @@
+int main()
+{
+  wall a;
+  a = wall(1, 2, 3, 4);
+  printS("before roate:");
+  put(a, 100, 200);
+  rotate(a, 90);
+  printS("after roate 90 degree:");
+  put(a, 100, 200);
+  return 0;
+}

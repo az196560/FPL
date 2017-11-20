@@ -56,7 +56,7 @@ let translate (globals, functions) =
   let printList l =
       List.iter (fun n -> Printf.printf "%s, " (A.string_of_expr n)) l;  Printf.printf "\n" in
 
-  let print m =
+  let printObjectValueMap m =
      StringMap.iter (fun key value -> Printf.printf "%s: " key;  printList value) m in
     
     (* Declare ensureInt and ensureFloat function *)
@@ -90,11 +90,11 @@ let translate (globals, functions) =
   let drawRec_func = L.declare_function "drawRec" drawRec_t the_module in
   
   (* Declare the built-in put_wall() function *)
-  let put_wall_t = L.function_type i32_t [|i32_t; i32_t; i32_t; i32_t; i32_t; i32_t|] in
+  let put_wall_t = L.function_type i32_t [|i32_t; i32_t; i32_t; i32_t; i32_t; i32_t; i32_t|] in
   let put_wall_func = L.declare_function "put_wall" put_wall_t the_module in
   
   (* Declare the built-in put_bed() function *)
-  let put_bed_t = L.function_type i32_t [|i32_t; i32_t; i32_t; i32_t; i32_t; i32_t|] in
+  let put_bed_t = L.function_type i32_t [|i32_t; i32_t; i32_t; i32_t; i32_t; i32_t; i32_t|] in
   let put_bed_func = L.declare_function "put_bed" put_bed_t the_module in
 
   (* Define each function (arguments and return type) so we can call it *)
@@ -150,9 +150,9 @@ let translate (globals, functions) =
       | A.StringLit s -> L.build_global_stringptr (s^"\x00") "strptr" builder
       | A.Noexpr -> L.const_int i32_t 0
       | A.Id s -> L.build_load (lookup s) s builder
-      | A.WallConstruct (n, act) | A.BedConstruct (n, act) -> 
-               fplObjectValueMap := StringMap.add n act !fplObjectValueMap;
-              (*print !fplObjectValueMap;*)
+      | A.WallConstruct (n, act) | A.BedConstruct (n, act) ->
+              fplObjectValueMap := StringMap.add n (act@[A.Literal(0)]) !fplObjectValueMap;
+              (*printObjectValueMap !fplObjectValueMap;*)
               L.const_int i32_t 0
       | A.Binop (e1, op, e2) ->
 	  let e1' = expr builder e1
@@ -234,6 +234,16 @@ let translate (globals, functions) =
 	        L.build_call put_bed_func (Array.of_list parameters) "put_bed" builder)
         else (
             L.const_int i32_t 0)
+      | A.Call ("rotate", act) ->
+     let fplObject = A.string_of_expr (List.hd act) in 
+     let degree = List.nth act 1 in 
+            let attributes = List.rev (StringMap.find fplObject !fplObjectValueMap) in
+            let attributes = [degree] @ (List.tl attributes) in
+            let attributes = List.rev (attributes) in
+            (*printList attributes;*)
+            fplObjectValueMap := StringMap.remove fplObject !fplObjectValueMap;
+            fplObjectValueMap := StringMap.add fplObject attributes !fplObjectValueMap;
+            L.const_int i32_t 0
       | A.Call (f, act) ->
          let (fdef, fdecl) = StringMap.find f function_decls in
 	 let actuals = List.rev (List.map (expr builder) (List.rev act)) in
