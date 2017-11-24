@@ -39,6 +39,10 @@ void put_circle(float x, float y, float diameter, float shiftX, float shiftY){
     printf("x:%f, y:%f, diameter:%f, shiftX:%f, shigtY:%f\n", x, y, diameter, shiftX, shiftY);
 }
 
+void render(){
+    printf("Hello render\n");
+}
+
 #ifdef BUILD_TEST
 int main()
 {
@@ -49,5 +53,6 @@ int main()
   put_window(0.0, 1.0, 90, 300.0, 400.0);
   put_rectangle(0.0, 1.0, 180, 400.0, 500.0);
   put_circle(0.0, 1.0, 1.0, 500.0, 600.0);
+  render();
 }
 #endif

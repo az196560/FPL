@@ -13,5 +13,6 @@ int main()
 
   put(a, 100.0, 200.0);
   put(b, 300.0, 400.0);
+  render();
   return 0;
 }

@@ -122,6 +122,10 @@ let translate (globals, functions) =
   let put_circle_t = L.function_type i32_t [|flt_t; flt_t; flt_t; flt_t; flt_t|] in
   let put_circle_func = L.declare_function "put_circle" put_circle_t the_module in
 
+  (* Declare the built-in render() function *)
+  let render_t = L.function_type i32_t [||] in
+  let render_func = L.declare_function "render" render_t the_module in
+  
   (* Define each function (arguments and return type) so we can call it *)
   let function_decls =
     let function_decl m fdecl =
@@ -304,6 +308,9 @@ let translate (globals, functions) =
             fplObjectValueMap := StringMap.remove fplObject !fplObjectValueMap;
             fplObjectValueMap := StringMap.add fplObject attributes !fplObjectValueMap;
             L.const_int i32_t 0)
+      | A.Call ("render", act) ->
+	 let parameters = List.map (expr builder) (act) in
+         L.build_call render_func (Array.of_list parameters) "render" builder
       | A.Call (f, act) ->
          let (fdef, fdecl) = StringMap.find f function_decls in
 	 let actuals = List.rev (List.map (expr builder) (List.rev act)) in
