@@ -86,7 +86,7 @@ Check() {
     reffile=`echo $1 | sed 's/.fpl$//'`
     basedir="`echo $1 | sed 's/\/[^\/]*$//'`/."
 
-    echo -n "$basename...\n"
+    echo -n "\n$basename..."
 
     echo 1>&2
     echo "###### Testing $basename" 1>&2

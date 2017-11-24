@@ -50,7 +50,7 @@ let check (globals, functions) =
   let built_in_decls =  StringMap.add "rotate"
      { typ = Void; fname = "rotate"; formals = [(Int, "x"); (Int, "y")];
        locals = []; body = [] } (StringMap.add "put"
-     { typ = Void; fname = "put"; formals = [(Int, "x"); (Int, "y"); (Int, "z")];
+     { typ = Void; fname = "put"; formals = [(Int, "x"); (Float, "y"); (Float, "z")];
        locals = []; body = [] } (StringMap.add "putc"
      { typ = Void; fname = "putc"; formals = [(Int, "x")];
        locals = []; body = [] }  (StringMap.add "print"
@@ -119,6 +119,11 @@ let check (globals, functions) =
       | Id s -> type_of_identifier s
       | WallConstruct(n, actuals) -> Wall
       | BedConstruct(n, actuals) -> Bed
+      | DeskConstruct(n, actuals) -> Desk
+      | DoorConstruct(n, actuals) -> Door
+      | WindowConstruct(n, actuals) -> Window
+      | RectangleConstruct(n, actuals) -> Rectangle
+      | CircleConstruct(n, actuals) -> Circle
       | Binop(e1, op, e2) as e -> let t1 = expr e1 and t2 = expr e2 in
 	(match op with
           Add | Sub | Mult | Div when t1 = Int && t2 = Int -> Int

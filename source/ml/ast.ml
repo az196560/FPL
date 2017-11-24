@@ -6,7 +6,7 @@ type op = Add | Sub | Mult | Div | Equal | Neq | Less | Leq | Greater | Geq |
 type uop = Neg | Not
 
 
-type typ = Int | Bool | Void | Float | Char | String | Wall | Bed
+type typ = Int | Bool | Void | Float | Char | String | Wall | Bed | Desk | Door | Window | Rectangle | Circle
 
 type bind = typ * string
 
@@ -22,6 +22,11 @@ type expr =
   | Unop of uop * expr
   | WallConstruct of string * expr list
   | BedConstruct of string * expr list
+  | DeskConstruct of string * expr list
+  | DoorConstruct of string * expr list
+  | WindowConstruct of string * expr list
+  | RectangleConstruct of string * expr list
+  | CircleConstruct of string * expr list
   | Assign of string * expr
   | Call of string * expr list
   | Noexpr
@@ -78,6 +83,11 @@ let rec string_of_expr = function
   | Unop(o, e) -> string_of_uop o ^ string_of_expr e
   | WallConstruct(n, el) -> n ^ " = wall(" ^ String.concat ", " (List.map string_of_expr el) ^ ")"
   | BedConstruct(n, el) -> n ^ " = bed(" ^ String.concat ", " (List.map string_of_expr el) ^ ")"
+  | DeskConstruct(n, el) -> n ^ " = desk(" ^ String.concat ", " (List.map string_of_expr el) ^ ")"
+  | DoorConstruct(n, el) -> n ^ " = door(" ^ String.concat ", " (List.map string_of_expr el) ^ ")"
+  | WindowConstruct(n, el) -> n ^ " = window(" ^ String.concat ", " (List.map string_of_expr el) ^ ")"
+  | RectangleConstruct(n, el) -> n ^ " = rectangle(" ^ String.concat ", " (List.map string_of_expr el) ^ ")"
+  | CircleConstruct(n, el) -> n ^ " = circle(" ^ String.concat ", " (List.map string_of_expr el) ^ ")"
   | Assign(v, e) -> v ^ " = " ^ string_of_expr e
   | Call(f, el) ->
       f ^ "(" ^ String.concat ", " (List.map string_of_expr el) ^ ")"
@@ -105,6 +115,11 @@ let string_of_typ = function
   | String -> "string"
   | Wall -> "wall"
   | Bed -> "bed"
+  | Desk -> "desk"
+  | Door -> "door"
+  | Window -> "window"
+  | Rectangle -> "rectangle"
+  | Circle -> "circle"
 
 let string_of_vdecl (t, id) = string_of_typ t ^ " " ^ id ^ ";\n"
 

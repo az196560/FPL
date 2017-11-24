@@ -37,7 +37,6 @@ rule token = parse
 | "bool"   { BOOL }
 | "float"  { FLOAT }
 | "char"   { CHAR }
-| "Wall"   { WALL}
 | "string" { STRING }
 | "void"   { VOID }
 | "true"   { TRUE }
@@ -45,6 +44,11 @@ rule token = parse
 | '''(_ as mychar)''' { CHAR_LITERAL(mychar) } 
 | "wall"   { WALL }
 | "bed"    { BED }
+| "desk"   { DESK }
+| "door"   { DOOR }
+| "window" { WINDOW }
+| "rectangle" { RECTANGLE }
+| "circle" { CIRCLE }
 | ['0'-'9']+ as lxm { LITERAL(int_of_string lxm) }
 | ['0'-'9']*'.'['0'-'9']+ | ['0'-'9']+'.'['0'-'9']* as lxm { FLOAT_LITERAL(float_of_string lxm)}
 | ['a'-'z' 'A'-'Z']['a'-'z' 'A'-'Z' '0'-'9' '_']* as lxm { ID(lxm) }

@@ -26,12 +26,12 @@ Tips to test built-in fucntion
 
 Compile external function as object file with gcc (do not use g++, it would casue link error!!!)
 
-$ gcc -o mydraw.o -c mydraw.c -lGL -lGLU -lglut
+$ gcc -o mydraw.o -c source/c/mydraw.c -lGL -lGLU -lglut
 
 Compile FPL code into assembly 
 
-$ ./fpl.native ./fplTest/test-drawLine.mc | llc > drawLine.S
+$ ./fpl.native ./fplTest/test-drawLine.fpl | llc > drawLine.S
 
 Link two files
 
-$ gcc -o mydraw mydraw.o drawLine.S -lGL -lGLU -lglut
+$ gcc -o mydraw source/c/mydraw.o drawLine.S -lGL-lGLU -lglut

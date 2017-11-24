@@ -8,7 +8,7 @@ open Ast
 %token PLUS MINUS TIMES DIVIDE ASSIGN NOT
 %token EQ NEQ LT LEQ GT GEQ TRUE FALSE AND OR
 %token RETURN IF ELSE FOR WHILE INT BOOL VOID FLOAT CHAR STRING
-%token WALL WALLCONSTRUCT BED BEDCONSTRUCT
+%token WALL WALLCONSTRUCT BED BEDCONSTRUCT DESK DESKCONSTRUCT DOOR DOORCONSTRUCT WINDOW WINDOWCONSTRUCT RECTANGLE RECTANGLECONSTRUCT CIRCLE CIRCLECONSTRUCT 
 %token <int> LITERAL
 %token <float> FLOAT_LITERAL
 %token <string> ID
@@ -21,6 +21,11 @@ open Ast
 %right ASSIGN
 %left WALL 
 %left BED 
+%left DESK 
+%left DOOR 
+%left WINDOW 
+%left RECTANGLE 
+%left CIRCLE 
 %left OR
 %left AND
 %left EQ NEQ
@@ -67,6 +72,11 @@ typ:
   | STRING { String }
   | WALL { Wall }
   | BED { Bed }
+  | DESK { Desk }
+  | DOOR { Door }
+  | WINDOW { Window }
+  | RECTANGLE { Rectangle }
+  | CIRCLE { Circle }
 
 vdecl_list:
     /* nothing */    { [] }
@@ -104,6 +114,11 @@ expr:
   | ID               { Id($1) }
   | ID ASSIGN WALL LPAREN actuals_opt RPAREN {WallConstruct($1, $5)}
   | ID ASSIGN BED LPAREN actuals_opt RPAREN {BedConstruct($1, $5)}
+  | ID ASSIGN DESK LPAREN actuals_opt RPAREN {DeskConstruct($1, $5)}
+  | ID ASSIGN DOOR LPAREN actuals_opt RPAREN {DoorConstruct($1, $5)}
+  | ID ASSIGN WINDOW LPAREN actuals_opt RPAREN {WindowConstruct($1, $5)}
+  | ID ASSIGN RECTANGLE LPAREN actuals_opt RPAREN {RectangleConstruct($1, $5)}
+  | ID ASSIGN CIRCLE LPAREN actuals_opt RPAREN {CircleConstruct($1, $5)}
   | expr PLUS   expr { Binop($1, Add,   $3) }
   | expr MINUS  expr { Binop($1, Sub,   $3) }
   | expr TIMES  expr { Binop($1, Mult,  $3) }

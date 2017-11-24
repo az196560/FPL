@@ -1,5 +1,13 @@
+float add(float x, float y)
+{
+  return x + y;
+}
+
 int main()
 {
+  float a; 
+  a = add(1.1 , 1.1);
+  printFloat(a);
   putc(104); /* h */
   putc(101); /* e */
   putc(108); /* l */

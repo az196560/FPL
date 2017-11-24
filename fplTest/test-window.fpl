@@ -1,9 +1,9 @@
 int main()
 {
-  wall a;
-  wall b;
-  a = wall(1.0, 2.0);
-  b = wall(3.0, 4.0);
+  window a;
+  window b;
+  a = window(1.0, 2.0);
+  b = window(3.0, 4.0);
   put(a, 100.0, 200.0);
   put(b, 300.0, 400.0);
   return 0;

@@ -43,7 +43,12 @@ let translate (globals, functions) =
     | A.String -> str_t
     | A.Void -> void_t
     | A.Wall -> fplObject_t
-    | A.Bed -> fplObject_t in
+    | A.Bed -> fplObject_t
+    | A.Desk -> fplObject_t
+    | A.Door -> fplObject_t
+    | A.Window -> fplObject_t
+    | A.Rectangle -> fplObject_t
+    | A.Circle -> fplObject_t in
 
   (* debug helper *)
   let rec getMap map = function
@@ -90,12 +95,32 @@ let translate (globals, functions) =
   let drawRec_func = L.declare_function "drawRec" drawRec_t the_module in
   
   (* Declare the built-in put_wall() function *)
-  let put_wall_t = L.function_type i32_t [|i32_t; i32_t; i32_t; i32_t; i32_t; i32_t; i32_t|] in
+  let put_wall_t = L.function_type i32_t [|flt_t; flt_t; i32_t; flt_t; flt_t|] in
   let put_wall_func = L.declare_function "put_wall" put_wall_t the_module in
   
   (* Declare the built-in put_bed() function *)
-  let put_bed_t = L.function_type i32_t [|i32_t; i32_t; i32_t; i32_t; i32_t; i32_t; i32_t|] in
+  let put_bed_t = L.function_type i32_t [|flt_t; flt_t; i32_t; flt_t; flt_t|] in
   let put_bed_func = L.declare_function "put_bed" put_bed_t the_module in
+
+  (* Declare the built-in put_desk() function *)
+  let put_desk_t = L.function_type i32_t [|flt_t; flt_t; i32_t; flt_t; flt_t|] in
+  let put_desk_func = L.declare_function "put_desk" put_desk_t the_module in
+
+  (* Declare the built-in put_door() function *)
+  let put_door_t = L.function_type i32_t [|flt_t; flt_t; i32_t; flt_t; flt_t|] in
+  let put_door_func = L.declare_function "put_door" put_door_t the_module in
+
+  (* Declare the built-in put_window() function *)
+  let put_window_t = L.function_type i32_t [|flt_t; flt_t; i32_t; flt_t; flt_t|] in
+  let put_window_func = L.declare_function "put_window" put_window_t the_module in
+
+  (* Declare the built-in put_rectangle() function *)
+  let put_rectangle_t = L.function_type i32_t [|flt_t; flt_t; i32_t; flt_t; flt_t|] in
+  let put_rectangle_func = L.declare_function "put_rectangle" put_rectangle_t the_module in
+
+  (* Declare the built-in put_circle() function *)
+  let put_circle_t = L.function_type i32_t [|flt_t; flt_t; flt_t; flt_t; flt_t|] in
+  let put_circle_func = L.declare_function "put_circle" put_circle_t the_module in
 
   (* Define each function (arguments and return type) so we can call it *)
   let function_decls =
@@ -150,8 +175,13 @@ let translate (globals, functions) =
       | A.StringLit s -> L.build_global_stringptr (s^"\x00") "strptr" builder
       | A.Noexpr -> L.const_int i32_t 0
       | A.Id s -> L.build_load (lookup s) s builder
-      | A.WallConstruct (n, act) | A.BedConstruct (n, act) ->
+      | A.WallConstruct (n, act) | A.BedConstruct (n, act) | A.DeskConstruct (n, act) | A.DoorConstruct (n, act) |
+        A.WindowConstruct (n, act) | A.RectangleConstruct (n, act) ->
               fplObjectValueMap := StringMap.add n (act@[A.Literal(0)]) !fplObjectValueMap;
+              (*printObjectValueMap !fplObjectValueMap;*)
+              L.const_int i32_t 0
+      | A.CircleConstruct (n, act) ->
+              fplObjectValueMap := StringMap.add n act !fplObjectValueMap;
               (*printObjectValueMap !fplObjectValueMap;*)
               L.const_int i32_t 0
       | A.Binop (e1, op, e2) ->
@@ -232,18 +262,48 @@ let translate (globals, functions) =
             let attributes = StringMap.find fplObject !fplObjectValueMap in
 	        let parameters = List.map (expr builder) (attributes@act) in
 	        L.build_call put_bed_func (Array.of_list parameters) "put_bed" builder)
+        else if typ = A.Desk then (
+            let act = List.tl act in
+            let attributes = StringMap.find fplObject !fplObjectValueMap in
+	        let parameters = List.map (expr builder) (attributes@act) in
+	        L.build_call put_desk_func (Array.of_list parameters) "put_desk" builder)
+        else if typ = A.Door then (
+            let act = List.tl act in
+            let attributes = StringMap.find fplObject !fplObjectValueMap in
+	        let parameters = List.map (expr builder) (attributes@act) in
+	        L.build_call put_door_func (Array.of_list parameters) "put_door" builder)
+        else if typ = A.Window then (
+            let act = List.tl act in
+            let attributes = StringMap.find fplObject !fplObjectValueMap in
+	        let parameters = List.map (expr builder) (attributes@act) in
+	        L.build_call put_window_func (Array.of_list parameters) "put_window" builder)
+        else if typ = A.Rectangle then (
+            let act = List.tl act in
+            let attributes = StringMap.find fplObject !fplObjectValueMap in
+	        let parameters = List.map (expr builder) (attributes@act) in
+	        L.build_call put_rectangle_func (Array.of_list parameters) "put_rectangle" builder)
+        else if typ = A.Circle then (
+            let act = List.tl act in
+            let attributes = StringMap.find fplObject !fplObjectValueMap in
+	        let parameters = List.map (expr builder) (attributes@act) in
+	        L.build_call put_circle_func (Array.of_list parameters) "put_circle" builder)
         else (
             L.const_int i32_t 0)
       | A.Call ("rotate", act) ->
      let fplObject = A.string_of_expr (List.hd act) in 
-     let degree = List.nth act 1 in 
+     let typ = StringMap.find fplObject localsTypeMap in 
+        if typ = A.Circle  then (
+            L.const_int i32_t 0
+        )
+        else(
+            let degree = List.nth act 1 in 
             let attributes = List.rev (StringMap.find fplObject !fplObjectValueMap) in
             let attributes = [degree] @ (List.tl attributes) in
             let attributes = List.rev (attributes) in
             (*printList attributes;*)
             fplObjectValueMap := StringMap.remove fplObject !fplObjectValueMap;
             fplObjectValueMap := StringMap.add fplObject attributes !fplObjectValueMap;
-            L.const_int i32_t 0
+            L.const_int i32_t 0)
       | A.Call (f, act) ->
          let (fdef, fdecl) = StringMap.find f function_decls in
 	 let actuals = List.rev (List.map (expr builder) (List.rev act)) in
