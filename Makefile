@@ -29,7 +29,7 @@ clean :
 	rm -rf testall.log *.diff fpl scanner.ml parser.ml parser.mli
 	rm -rf $(CPATH)/printbig.o
 	rm -rf $(CPATH)/fplFunctions.o
-	rm -rf *.cmx *.cmi *.cmo *.cmx *.o *.s *.ll *.out *.exe
+	rm -rf *.cmx *.cmi *.cmo *.cmx *.o *.s *.ll *.out *.exe *.S
 
 # More detailed: build using ocamlc/ocamlopt + ocamlfind to locate LLVM
 

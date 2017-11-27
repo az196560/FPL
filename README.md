@@ -34,4 +34,6 @@ $ ./fpl.native ./fplTest/test-drawLine.fpl | llc > drawLine.S
 
 Link two files
 
-$ gcc -o mydraw source/c/mydraw.o drawLine.S -lGL-lGLU -lglut
+$ gcc -o mydraw mydraw.o drawLine.S -lGL-lGLU -lglut
+
+In Mac OS X, we can use -framework OpenGL -framework GLUT to link the OpenGL library.

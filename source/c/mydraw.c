@@ -58,8 +58,9 @@ glColor3f(0, 0, 0);	//Trapezoid
 void drawLine(int a)
 {
     int argc = 1;
+    char *argv[1]={""};
 	//Initialize GLUT
-	glutInit(&argc, NULL);
+	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
 	glutInitWindowSize(400, 400); //Set the window size
 	//Create the window
@@ -74,8 +75,9 @@ void drawLine(int a)
 void drawRec(int a)
 {
     int argc = 1;
+    char *argv[1]={""};
 	//Initialize GLUT
-	glutInit(&argc, NULL);
+	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
 	glutInitWindowSize(400, 400); //Set the window size
 	//Create the window
@@ -92,4 +94,5 @@ void drawRec(int a)
 int main(int argc, char** argv) {
 	drawLine(1);
     return 0;
-}*/
+}
+*/
