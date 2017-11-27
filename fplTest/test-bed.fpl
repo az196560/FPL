@@ -2,10 +2,10 @@ int main()
 {
   bed a;
   bed b;
-  a = bed(1.0, 2.0);
-  b = bed(3.0, 4.0);
-  put(a, 100.0, 200.0);
-  put(b, 300.0, 400.0);
+  a = bed(5.0, 5.0);
+  b = bed(5.0, 5.0);
+  put(a, 0.0, 0.0);
+  put(b, 5.0, 5.0);
   render();
   return 0;
 }
