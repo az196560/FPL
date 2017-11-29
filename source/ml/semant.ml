@@ -29,7 +29,8 @@ let check (globals, functions) =
   (* Raise an exception of the given rvalue type cannot be assigned to
      the given lvalue type *)
   let check_assign lvaluet rvaluet err =
-     lvaluet (*if (Pervasives.(=) lvaluet rvaluet) then lvaluet else raise err*)
+     if (lvaluet=Int && ((rvaluet=Wall)||(rvaluet=Bed)||(rvaluet=Desk)||(rvaluet=Door)||(rvaluet=Window)||(rvaluet=Rectangle)||(rvaluet=Circle))) then lvaluet
+     else if (Pervasives.(=) lvaluet rvaluet) then lvaluet else raise err
   in
    
   (**** Checking Global Variables ****)
@@ -120,32 +121,46 @@ let check (globals, functions) =
       | StringLit _ -> String
       | Id s -> type_of_identifier s
       | WallConstruct(n, actuals) -> let name = type_of_identifier n and f = List.map expr actuals in
-      if (List.for_all(isNumType) f)&&(name=Wall) then Wall
-      else raise (Failure ("expected numeric input for Wall"))
+      if (List.length f==2) then 
+        if(List.for_all(isNumType) f)&&(name=Wall) then Wall
+        else raise (Failure ("expected numeric input for Wall"))
+      else raise(Failure("Wrong number of parameters for Wall"))
 
       | BedConstruct(n, actuals) -> let name = type_of_identifier n and f = List.map expr actuals in
-      if (List.for_all(isNumType) f)&&(name=Bed) then Bed
-      else raise (Failure ("expected numeric input for Bed"))
+      if (List.length f==2) then
+        if (List.for_all(isNumType) f)&&(name=Bed) then Bed
+        else raise (Failure ("expected numeric input for Bed"))
+      else raise(Failure("Wrong number of parameters for Bed"))
       
       | DeskConstruct(n, actuals) -> let name = type_of_identifier n and f = List.map expr actuals in
-      if (List.for_all(isNumType) f)&&(name=Desk) then Desk
-      else raise (Failure ("expected numeric input for Desk"))
+      if (List.length f==2) then
+        if (List.for_all(isNumType) f)&&(name=Desk) then Desk
+        else raise (Failure ("expected numeric input for Desk"))
+      else raise(Failure("Wrong number of parameters for Desk"))
 
       | DoorConstruct(n, actuals) -> let name = type_of_identifier n and f = List.map expr actuals in
-      if (List.for_all(isNumType) f)&&(name=Door) then Door
-      else raise (Failure ("expected numeric input for Door"))
+      if (List.length f==2) then
+        if (List.for_all(isNumType) f)&&(name=Door) then Door
+        else raise (Failure ("expected numeric input for Door"))
+      else raise(Failure("Wrong number of parameters for Door"))
 
       | WindowConstruct(n, actuals) -> let name = type_of_identifier n and f = List.map expr actuals in
-      if (List.for_all(isNumType) f)&&(name=Window) then Window
-      else raise (Failure ("expected numeric input for Window"))
+      if (List.length f==2) then
+        if (List.for_all(isNumType) f)&&(name=Window) then Window
+        else raise (Failure ("expected numeric input for Window"))
+      else raise(Failure("Wrong number of parameters for Window"))
 
       | RectangleConstruct(n, actuals) -> let name = type_of_identifier n and f = List.map expr actuals in
-      if (List.for_all(isNumType) f)&&(name=Rectangle) then Rectangle
-      else raise (Failure ("expected numeric input for Rectangle"))
+      if (List.length f==2) then
+        if (List.for_all(isNumType) f)&&(name=Rectangle) then Rectangle
+        else raise (Failure ("expected numeric input for Rectangle"))
+      else raise(Failure("Wrong number of parameters for Rectangle"))
 
       | CircleConstruct(n, actuals) -> let name = type_of_identifier n and f = List.map expr actuals in
-      if (List.for_all(isNumType) f)&&(name=Circle) then Circle
-      else raise (Failure ("expected numeric input for Circle"))
+      if (List.length f==3) then
+        if (List.for_all(isNumType) f)&&(name=Circle) then Circle
+        else raise (Failure ("expected numeric input for Circle"))
+      else raise(Failure("Wrong number of parameters for Circle"))
 
       | Binop(e1, op, e2) as e -> let t1 = expr e1 and t2 = expr e2 in
 	(match op with
