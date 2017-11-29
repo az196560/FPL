@@ -111,9 +111,6 @@ let check (globals, functions) =
 (* check if given type is an int or float *)
     let isNumType t = if (t = Int || t = Float) then true else false in
 
-    (* check if given type is string or char *)
-    (* let isNameType t = if (t = String || t = Char) then true else false in *)
-
     (* Return the type of an expression or throw an exception *)
     let rec expr = function
 	    Literal _ -> Int
@@ -122,32 +119,32 @@ let check (globals, functions) =
       | CharLit _ -> Char
       | StringLit _ -> String
       | Id s -> type_of_identifier s
-      | WallConstruct(_, actuals) -> let f = List.map expr actuals in
-      if (List.for_all(isNumType) f) then Wall
+      | WallConstruct(n, actuals) -> let name = type_of_identifier n and f = List.map expr actuals in
+      if (List.for_all(isNumType) f)&&(name=Wall) then Wall
       else raise (Failure ("expected numeric input for Wall"))
 
-      | BedConstruct(_, actuals) -> let f = List.map expr actuals in
-      if (List.for_all(isNumType) f) then Bed
+      | BedConstruct(n, actuals) -> let name = type_of_identifier n and f = List.map expr actuals in
+      if (List.for_all(isNumType) f)&&(name=Bed) then Bed
       else raise (Failure ("expected numeric input for Bed"))
       
-      | DeskConstruct(_, actuals) -> let f = List.map expr actuals in
-      if (List.for_all(isNumType) f) then Desk
+      | DeskConstruct(n, actuals) -> let name = type_of_identifier n and f = List.map expr actuals in
+      if (List.for_all(isNumType) f)&&(name=Desk) then Desk
       else raise (Failure ("expected numeric input for Desk"))
 
-      | DoorConstruct(_, actuals) -> let f = List.map expr actuals in
-      if (List.for_all(isNumType) f) then Door
+      | DoorConstruct(n, actuals) -> let name = type_of_identifier n and f = List.map expr actuals in
+      if (List.for_all(isNumType) f)&&(name=Door) then Door
       else raise (Failure ("expected numeric input for Door"))
 
-      | WindowConstruct(_, actuals) -> let f = List.map expr actuals in
-      if (List.for_all(isNumType) f) then Window
+      | WindowConstruct(n, actuals) -> let name = type_of_identifier n and f = List.map expr actuals in
+      if (List.for_all(isNumType) f)&&(name=Window) then Window
       else raise (Failure ("expected numeric input for Window"))
 
-      | RectangleConstruct(_, actuals) -> let f = List.map expr actuals in
-      if (List.for_all(isNumType) f) then Rectangle
+      | RectangleConstruct(n, actuals) -> let name = type_of_identifier n and f = List.map expr actuals in
+      if (List.for_all(isNumType) f)&&(name=Rectangle) then Rectangle
       else raise (Failure ("expected numeric input for Rectangle"))
 
-      | CircleConstruct(_, actuals) -> let f = List.map expr actuals in
-      if (List.for_all(isNumType) f) then Circle
+      | CircleConstruct(n, actuals) -> let name = type_of_identifier n and f = List.map expr actuals in
+      if (List.for_all(isNumType) f)&&(name=Circle) then Circle
       else raise (Failure ("expected numeric input for Circle"))
 
       | Binop(e1, op, e2) as e -> let t1 = expr e1 and t2 = expr e2 in
