@@ -6,14 +6,17 @@ open Ast
 
 %token SEMI LPAREN RPAREN LBRACE RBRACE COMMA LSQUARE RSQUARE
 %token PLUS MINUS TIMES DIVIDE ASSIGN NOT
+%token DOT
 %token EQ NEQ LT LEQ GT GEQ TRUE FALSE AND OR
-%token RETURN IF ELSE FOR WHILE INT BOOL VOID FLOAT CHAR STRING
-%token WALL WALLCONSTRUCT BED BEDCONSTRUCT DESK DESKCONSTRUCT DOOR DOORCONSTRUCT WINDOW WINDOWCONSTRUCT RECTANGLE RECTANGLECONSTRUCT CIRCLE CIRCLECONSTRUCT 
+%token RETURN IF ELSE FOR WHILE INT BOOL VOID FLOAT CHAR STRING STRUCT 
+%token WALL WALLCONSTRUCT BED BEDCONSTRUCT DESK DESKCONSTRUCT DOOR DOORCONSTRUCT 
+%token WINDOW WINDOWCONSTRUCT RECTANGLE RECTANGLECONSTRUCT CIRCLE CIRCLECONSTRUCT 
 %token <int> LITERAL
 %token <float> FLOAT_LITERAL
 %token <string> ID
 %token <char> CHAR_LITERAL
 %token <string> STRING_LITERAL
+%token <string> STRUCT_ID
 %token EOF
 
 %nonassoc NOELSE
@@ -43,9 +46,10 @@ program:
   decls EOF { $1 }
 
 decls:
-   /* nothing */ { [], [] }
- | decls vdecl { ($2 :: fst $1), snd $1 }
- | decls fdecl { fst $1, ($2 :: snd $1) }
+   /* nothing */ { {globals=[]; functions=[]; structs=[]} }
+ | decls vdecl { {globals = ($2 :: $1.globals); functions = $1.functions; structs = $1.structs} }
+ | decls fdecl { {globals = $1.globals; functions = ($2 :: $1.functions); structs = $1.structs} }
+ | decls struct_decl { {globals = $1.globals; functions = $1.functions; structs = ($2 :: $1.structs)} }
 
 fdecl:
    typ ID LPAREN formals_opt RPAREN LBRACE vdecl_list stmt_list RBRACE
@@ -63,6 +67,11 @@ formal_list:
     typ ID                   { [($1,$2)] }
   | formal_list COMMA typ ID { ($3,$4) :: $1 }
 
+struct_decl:
+    STRUCT STRUCT_ID LBRACE vdecl_list RBRACE SEMI
+    { { members = $4;
+        struct_name = $2; } }
+
 typ:
     INT { Int }
   | BOOL { Bool }
@@ -77,6 +86,7 @@ typ:
   | WINDOW { Window }
   | RECTANGLE { Rectangle }
   | CIRCLE { Circle }
+  | STRUCT_ID { Struct($1) }
 
 vdecl_list:
     /* nothing */    { [] }
@@ -119,6 +129,7 @@ expr:
   | ID ASSIGN WINDOW LPAREN actuals_opt RPAREN {WindowConstruct($1, $5)}
   | ID ASSIGN RECTANGLE LPAREN actuals_opt RPAREN {RectangleConstruct($1, $5)}
   | ID ASSIGN CIRCLE LPAREN actuals_opt RPAREN {CircleConstruct($1, $5)}
+  | expr DOT ID                          { StructAccess($1, $3) }
   | expr PLUS   expr { Binop($1, Add,   $3) }
   | expr MINUS  expr { Binop($1, Sub,   $3) }
   | expr TIMES  expr { Binop($1, Mult,  $3) }

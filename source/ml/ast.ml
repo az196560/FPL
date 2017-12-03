@@ -6,7 +6,7 @@ type op = Add | Sub | Mult | Div | Equal | Neq | Less | Leq | Greater | Geq |
 type uop = Neg | Not
 
 
-type typ = Int | Bool | Void | Float | Char | String | Wall | Bed | Desk | Door | Window | Rectangle | Circle
+type typ = Int | Bool | Void | Float | Char | String | Wall | Bed | Desk | Door | Window | Rectangle | Circle | Struct of string 
 
 type bind = typ * string
 
@@ -27,6 +27,7 @@ type expr =
   | WindowConstruct of string * expr list
   | RectangleConstruct of string * expr list
   | CircleConstruct of string * expr list
+  | StructAccess of expr * string
   | Assign of string * expr
   | Call of string * expr list
   | Noexpr
@@ -47,7 +48,16 @@ type func_decl = {
     body : stmt list;
   }
 
-type program = bind list * func_decl list
+type struct_decl = {
+    members: bind list;
+    struct_name: string;
+  }
+
+type program = {
+    globals: bind list;
+    functions: func_decl list;
+    structs: struct_decl list;
+}
 
 (* Pretty-printing functions *)
 
@@ -89,6 +99,7 @@ let rec string_of_expr = function
   | RectangleConstruct(n, el) -> n ^ " = rectangle(" ^ String.concat ", " (List.map string_of_expr el) ^ ")"
   | CircleConstruct(n, el) -> n ^ " = circle(" ^ String.concat ", " (List.map string_of_expr el) ^ ")"
   | Assign(v, e) -> v ^ " = " ^ string_of_expr e
+  | StructAccess(s, n) -> (string_of_expr s) ^ "." ^ n
   | Call(f, el) ->
       f ^ "(" ^ String.concat ", " (List.map string_of_expr el) ^ ")"
   | Noexpr -> ""
@@ -120,8 +131,12 @@ let string_of_typ = function
   | Window -> "window"
   | Rectangle -> "rectangle"
   | Circle -> "circle"
+  | Struct(id) -> id
 
 let string_of_vdecl (t, id) = string_of_typ t ^ " " ^ id ^ ";\n"
+
+let string_of_sdecl sdecl =
+  "struct" ^ sdecl.struct_name ^ String.concat "{\n" (List.map string_of_vdecl sdecl.members) ^ "\n}\n"
 
 let string_of_fdecl fdecl =
   string_of_typ fdecl.typ ^ " " ^
@@ -131,6 +146,7 @@ let string_of_fdecl fdecl =
   String.concat "" (List.map string_of_stmt fdecl.body) ^
   "}\n"
 
-let string_of_program (vars, funcs) =
-  String.concat "" (List.map string_of_vdecl vars) ^ "\n" ^
-  String.concat "\n" (List.map string_of_fdecl funcs)
+let string_of_program prg =
+  String.concat "" (List.map string_of_vdecl prg.globals) ^ "\n" ^
+  String.concat "\n" (List.map string_of_fdecl prg.functions) ^
+  String.concat "\n" (List.map string_of_sdecl prg.structs)

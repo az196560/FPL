@@ -12,6 +12,7 @@ http://llvm.moe/ocaml/
 
 *)
 
+open Ast
 module L = Llvm
 module A = Ast
 
@@ -24,7 +25,7 @@ exception FPL_err of string;;
 let localsTypeMap = StringMap.empty;;
 let fplObjectValueMap = ref StringMap.empty;;
 
-let translate (globals, functions) =
+let translate program =
   let context = L.global_context () in
   let the_module = L.create_module context "Fpl"
   and i32_t  = L.i32_type  context
@@ -76,7 +77,7 @@ let translate (globals, functions) =
     let global_var m (t, n) =
       let init = L.const_int (ltype_of_typ t) 0
       in StringMap.add n (L.define_global n init the_module) m in
-    List.fold_left global_var StringMap.empty globals in
+    List.fold_left global_var StringMap.empty program.globals in
 
   (* Declare printf(), which the print built-in function will call *)
   let printf_t = L.var_arg_function_type i32_t [| L.pointer_type i8_t |] in
@@ -134,7 +135,7 @@ let translate (globals, functions) =
 	Array.of_list (List.map (fun (t,_) -> ltype_of_typ t) fdecl.A.formals)
       in let ftype = L.function_type (ltype_of_typ fdecl.A.typ) formal_types in
       StringMap.add name (L.define_function name ftype the_module, fdecl) m in
-    List.fold_left function_decl StringMap.empty functions in
+    List.fold_left function_decl StringMap.empty program.functions in
   
   (* Fill in the body of the given function *)
   let build_function_body fdecl =
@@ -377,5 +378,5 @@ let translate (globals, functions) =
       | t -> L.build_ret (L.const_int (ltype_of_typ t) 0))
   in
 
-  List.iter build_function_body functions;
+  List.iter build_function_body program.functions;
   the_module

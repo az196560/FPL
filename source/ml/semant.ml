@@ -9,7 +9,7 @@ module StringMap = Map.Make(String)
 
    Check each global variable, then check each function *)
 
-let check (globals, functions) =
+let check program =
 
   (* Raise an exception if the given list has a duplicate *)
   let report_duplicate exceptf list =
@@ -35,17 +35,17 @@ let check (globals, functions) =
    
   (**** Checking Global Variables ****)
 
-  List.iter (check_not_void (fun n -> "illegal void global " ^ n)) globals;
+  List.iter (check_not_void (fun n -> "illegal void global " ^ n)) program.globals;
    
-  report_duplicate (fun n -> "duplicate global " ^ n) (List.map snd globals);
+  report_duplicate (fun n -> "duplicate global " ^ n) (List.map snd program.globals);
 
   (**** Checking Functions ****)
 
-  if List.mem "print" (List.map (fun fd -> fd.fname) functions)
+  if List.mem "print" (List.map (fun fd -> fd.fname) program.functions)
   then raise (Failure ("function print may not be defined")) else ();
 
   report_duplicate (fun n -> "duplicate function " ^ n)
-    (List.map (fun fd -> fd.fname) functions);
+    (List.map (fun fd -> fd.fname) program.functions);
 
   (* Function declaration for a named function *)
   let built_in_decls =  StringMap.add "render"
@@ -76,7 +76,7 @@ let check (globals, functions) =
    in
      
   let function_decls = List.fold_left (fun m fd -> StringMap.add fd.fname fd m)
-                         built_in_decls functions
+                         built_in_decls program.functions
   in
 
   let function_decl s = try StringMap.find s function_decls
@@ -101,7 +101,7 @@ let check (globals, functions) =
 
     (* Type of each variable (global, formal, or local *)
     let symbols = List.fold_left (fun m (t, n) -> StringMap.add n t m)
-	StringMap.empty (globals @ func.formals @ func.locals )
+	StringMap.empty (program.globals @ func.formals @ func.locals )
     in
 
     let type_of_identifier s =
@@ -232,4 +232,4 @@ let check (globals, functions) =
     stmt (Block func.body)
    
   in
-  List.iter check_function functions
+  List.iter check_function program.functions
