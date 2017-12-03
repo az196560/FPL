@@ -68,7 +68,7 @@ formal_list:
   | formal_list COMMA typ ID { ($3,$4) :: $1 }
 
 struct_decl:
-    STRUCT STRUCT_ID LBRACE vdecl_list RBRACE SEMI
+    STRUCT STRUCT_ID  LBRACE vdecl_list RBRACE SEMI
     { { members = $4;
         struct_name = $2; } }
 

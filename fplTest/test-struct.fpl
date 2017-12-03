@@ -1,0 +1,16 @@
+struct Test {
+    int x;
+    int y;
+};
+
+int main()
+{
+  bed a;
+  bed b;
+  a = bed(5.0, 5.0);
+  b = bed(5.0, 5.0);
+  put(a, 0.0, 0.0);
+  put(b, 5.0, 5.0);
+  render();
+  return 0;
+}

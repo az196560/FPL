@@ -34,7 +34,8 @@ let translate program =
   and flt_t  = L.float_type context
   and str_t  = L.pointer_type (L.i8_type context)
   and void_t = L.void_type context
-  and fplObject_t = L.i16_type context in
+  and fplObject_t = L.i16_type context
+  and struct_t n = L.named_struct_type context n in
 
   let ltype_of_typ = function
       A.Int -> i32_t
@@ -49,7 +50,9 @@ let translate program =
     | A.Door -> fplObject_t
     | A.Window -> fplObject_t
     | A.Rectangle -> fplObject_t
-    | A.Circle -> fplObject_t in
+    | A.Circle -> fplObject_t 
+    | A.Struct n -> struct_t n (* unitialized struct type *)
+  in
 
   (* debug helper *)
   let rec getMap map = function
