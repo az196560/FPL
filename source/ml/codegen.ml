@@ -106,34 +106,6 @@ let translate program =
   let put_t = L.function_type i32_t [|i32_t; i32_t; flt_t; flt_t; flt_t; flt_t; flt_t|] in
   let put_func = L.declare_function "put" put_t the_module in
   
-  (* Declare the built-in put_wall() function *)
-  let put_wall_t = L.function_type i32_t [|flt_t; flt_t; i32_t; flt_t; flt_t|] in
-  let put_wall_func = L.declare_function "put_wall" put_wall_t the_module in
-  
-  (* Declare the built-in put_bed() function *)
-  let put_bed_t = L.function_type i32_t [|flt_t; flt_t; i32_t; flt_t; flt_t|] in
-  let put_bed_func = L.declare_function "put_bed" put_bed_t the_module in
-
-  (* Declare the built-in put_desk() function *)
-  let put_desk_t = L.function_type i32_t [|flt_t; flt_t; i32_t; flt_t; flt_t|] in
-  let put_desk_func = L.declare_function "put_desk" put_desk_t the_module in
-
-  (* Declare the built-in put_door() function *)
-  let put_door_t = L.function_type i32_t [|flt_t; flt_t; i32_t; flt_t; flt_t|] in
-  let put_door_func = L.declare_function "put_door" put_door_t the_module in
-
-  (* Declare the built-in put_window() function *)
-  let put_window_t = L.function_type i32_t [|flt_t; flt_t; i32_t; flt_t; flt_t|] in
-  let put_window_func = L.declare_function "put_window" put_window_t the_module in
-
-  (* Declare the built-in put_rectangle() function *)
-  let put_rectangle_t = L.function_type i32_t [|flt_t; flt_t; i32_t; flt_t; flt_t|] in
-  let put_rectangle_func = L.declare_function "put_rectangle" put_rectangle_t the_module in
-
-  (* Declare the built-in put_circle() function *)
-  let put_circle_t = L.function_type i32_t [|flt_t; flt_t; flt_t; flt_t; flt_t|] in
-  let put_circle_func = L.declare_function "put_circle" put_circle_t the_module in
-
   (* Declare the built-in render() function *)
   let render_t = L.function_type i32_t [||] in
   let render_func = L.declare_function "render" render_t the_module in
@@ -351,10 +323,6 @@ let translate program =
 	  | A.Greater -> L.build_icmp L.Icmp.Sgt
 	  | A.Geq     -> L.build_icmp L.Icmp.Sge
     ) (ensureInt e1') (ensureInt e2') "tmp" builder
-      | A.ArrayAccess (e1, e2) ->
-        let arr_ptr =  L.build_gep (lookup e1) [|L.const_int i32_t 0|] "dummy" builder in let ele_ptr = L.build_struct_gep arr_ptr (match e2 with 
-        | A.Literal(i) -> i
-        | _ -> 0)  "el" builder in  L.build_load ele_ptr "ptr" builder;
       | A.Unop(op, e) ->
       let e' = expr builder e in
       (match op with

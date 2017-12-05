@@ -4,7 +4,7 @@
 open Ast
 %}
 
-%token SEMI LPAREN RPAREN LBRACE RBRACE COMMA LSQUARE RSQUARE
+%token SEMI LPAREN RPAREN LBRACE RBRACE COMMA 
 %token PLUS MINUS TIMES DIVIDE ASSIGN NOT
 %token DOT
 %token EQ NEQ LT LEQ GT GEQ TRUE FALSE AND OR
@@ -136,7 +136,6 @@ expr:
   | ID DOT ID ASSIGN WINDOW LPAREN actuals_opt RPAREN {WindowStructConstruct($1, $3, $7)}
   | ID DOT ID ASSIGN RECTANGLE LPAREN actuals_opt RPAREN {RectangleStructConstruct($1, $3, $7)}
   | ID DOT ID ASSIGN CIRCLE LPAREN actuals_opt RPAREN {CircleStructConstruct($1, $3, $7)}
-  | expr DOT ID                          { StructAccess($1, $3) }
   | expr PLUS   expr { Binop($1, Add,   $3) }
   | expr MINUS  expr { Binop($1, Sub,   $3) }
   | expr TIMES  expr { Binop($1, Mult,  $3) }

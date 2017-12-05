@@ -7,8 +7,6 @@ rule token = parse
 | "/*"     { comment lexbuf }           (* Comments *)
 | '('      { LPAREN }
 | ')'      { RPAREN }
-| '['      { LSQUARE }
-| ']'      { RSQUARE }
 | '{'      { LBRACE }
 | '}'      { RBRACE }
 | ';'      { SEMI }

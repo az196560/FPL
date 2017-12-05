@@ -15,7 +15,6 @@ type expr =
   | FLiteral of float
   | CharLit of char
   | StringLit of string
-  | ArrayAccess of string * expr 
   | BoolLit of bool
   | Id of string
   | Binop of expr * op * expr
@@ -34,7 +33,6 @@ type expr =
   | WindowConstruct of string * expr list
   | RectangleConstruct of string * expr list
   | CircleConstruct of string * expr list
-  | StructAccess of expr * string
   | Assign of string * expr
   | Call of string * expr list
   | Noexpr
@@ -93,7 +91,6 @@ let rec string_of_expr = function
   | StringLit(s) -> s
   | BoolLit(true) -> "true"
   | BoolLit(false) -> "false"
-  | ArrayAccess(e1,e2) -> e1 ^ "[" ^ string_of_expr e2^ "]"
   | Id(s) -> s
   | Binop(e1, o, e2) ->
       string_of_expr e1 ^ " " ^ string_of_op o ^ " " ^ string_of_expr e2
@@ -113,7 +110,6 @@ let rec string_of_expr = function
   | RectangleStructConstruct(structName, memberName, el) -> structName ^ "." ^ memberName ^ " = rectangle(" ^ String.concat ", " (List.map string_of_expr el) ^ ")"
   | CircleStructConstruct(structName, memberName, el) -> structName ^ "." ^ memberName ^ " = circle(" ^ String.concat ", " (List.map string_of_expr el) ^ ")"
   | Assign(v, e) -> v ^ " = " ^ string_of_expr e
-  | StructAccess(s, n) -> (string_of_expr s) ^ "." ^ n
   | Call(f, el) ->
       f ^ "(" ^ String.concat ", " (List.map string_of_expr el) ^ ")"
   | Noexpr -> ""
