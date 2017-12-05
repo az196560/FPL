@@ -29,8 +29,10 @@ let check program =
   (* Raise an exception of the given rvalue type cannot be assigned to
      the given lvalue type *)
   let check_assign lvaluet rvaluet err =
+     lvaluet
+     (*)
      if (lvaluet=Int && ((rvaluet=Wall)||(rvaluet=Bed)||(rvaluet=Desk)||(rvaluet=Door)||(rvaluet=Window)||(rvaluet=Rectangle)||(rvaluet=Circle))) then lvaluet
-     else if (Pervasives.(=) lvaluet rvaluet) then lvaluet else raise err
+     else if (Pervasives.(=) lvaluet rvaluet) then lvaluet else raise err *)
   in
    
   (**** Checking Global Variables ****)
@@ -120,6 +122,13 @@ let check program =
       | CharLit _ -> Char
       | StringLit _ -> String
       | Id s -> type_of_identifier s
+      | WallStructConstruct(structName, memberName, el) -> Wall
+      | BedStructConstruct(structName, memberName, el) -> Bed
+      | DeskStructConstruct(structName, memberName, el) -> Desk
+      | DoorStructConstruct(structName, memberName, el) -> Door
+      | WindowStructConstruct(structName, memberName, el) -> Window
+      | RectangleStructConstruct(structName, memberName, el) -> Rectangle
+      | CircleStructConstruct(structName, memberName, el) -> Circle
       | WallConstruct(n, actuals) -> let name = type_of_identifier n and f = List.map expr actuals in
       if (List.length f==2) then 
         if(List.for_all(isNumType) f)&&(name=Wall) then Wall

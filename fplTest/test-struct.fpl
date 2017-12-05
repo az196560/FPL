@@ -1,16 +1,33 @@
-struct Test {
-    int x;
-    int y;
+struct Kitchen {
+    wall a;
+    bed  b;
+    desk c;
+    door d;
+};
+
+struct Bedroom {
+    window e;
+    rectangle f;
+    circle g;
 };
 
 int main()
 {
-  bed a;
-  bed b;
-  a = bed(5.0, 5.0);
-  b = bed(5.0, 5.0);
-  put(a, 0.0, 0.0);
-  put(b, 5.0, 5.0);
+  Kitchen k;
+  Bedroom r;
+  wall a;
+
+  k.a = wall(1.0, 2.0);
+  k.b = bed(3.0, 4.0);
+  k.c = desk(5.0, 6.0);
+  k.d = door(7.0, 8.0);
+  r.e = window(7.0, 8.0);
+  r.f = rectangle(9.0, 10.0);
+  r.g = circle(11.0, 12.0, 1.0);
+  a = wall(5.0, 5.0);
+  put(k, 10.0, 20.0);
+  put(r, 30.0, 40.0);
+  put(a, 50.0, 60.0);
   render();
   return 0;
 }

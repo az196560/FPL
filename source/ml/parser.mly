@@ -129,6 +129,13 @@ expr:
   | ID ASSIGN WINDOW LPAREN actuals_opt RPAREN {WindowConstruct($1, $5)}
   | ID ASSIGN RECTANGLE LPAREN actuals_opt RPAREN {RectangleConstruct($1, $5)}
   | ID ASSIGN CIRCLE LPAREN actuals_opt RPAREN {CircleConstruct($1, $5)}
+  | ID DOT ID ASSIGN WALL LPAREN actuals_opt RPAREN {WallStructConstruct($1, $3, $7)}
+  | ID DOT ID ASSIGN BED LPAREN actuals_opt RPAREN {BedStructConstruct($1, $3, $7)}
+  | ID DOT ID ASSIGN DESK LPAREN actuals_opt RPAREN {DeskStructConstruct($1, $3, $7)}
+  | ID DOT ID ASSIGN DOOR LPAREN actuals_opt RPAREN {DoorStructConstruct($1, $3, $7)}
+  | ID DOT ID ASSIGN WINDOW LPAREN actuals_opt RPAREN {WindowStructConstruct($1, $3, $7)}
+  | ID DOT ID ASSIGN RECTANGLE LPAREN actuals_opt RPAREN {RectangleStructConstruct($1, $3, $7)}
+  | ID DOT ID ASSIGN CIRCLE LPAREN actuals_opt RPAREN {CircleStructConstruct($1, $3, $7)}
   | expr DOT ID                          { StructAccess($1, $3) }
   | expr PLUS   expr { Binop($1, Add,   $3) }
   | expr MINUS  expr { Binop($1, Sub,   $3) }

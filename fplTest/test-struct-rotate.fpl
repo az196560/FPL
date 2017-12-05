@@ -1,0 +1,25 @@
+struct Room {
+    wall a;
+    bed  b;
+    desk c;
+    door d;
+};
+
+int main()
+{
+  Room r;
+  r.a = wall(1.0, 2.0);
+  r.b = bed(3.0, 4.0);
+  r.c = desk(5.0, 6.0);
+  r.d = door(7.0, 8.0);
+
+  printS("before roate:");
+  put(r, 10.0, 20.0);
+  
+  printS("after roate 90 degree....................");
+  rotate(r, 90);
+  put(r, 30.0, 40.0);
+
+  render();
+  return 0;
+}

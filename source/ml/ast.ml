@@ -20,6 +20,13 @@ type expr =
   | Id of string
   | Binop of expr * op * expr
   | Unop of uop * expr
+  | WallStructConstruct of string * string * expr list
+  | BedStructConstruct of string * string * expr list
+  | DeskStructConstruct of string * string * expr list
+  | DoorStructConstruct of string * string * expr list
+  | WindowStructConstruct of string * string * expr list
+  | RectangleStructConstruct of string * string * expr list
+  | CircleStructConstruct of string * string * expr list
   | WallConstruct of string * expr list
   | BedConstruct of string * expr list
   | DeskConstruct of string * expr list
@@ -98,6 +105,13 @@ let rec string_of_expr = function
   | WindowConstruct(n, el) -> n ^ " = window(" ^ String.concat ", " (List.map string_of_expr el) ^ ")"
   | RectangleConstruct(n, el) -> n ^ " = rectangle(" ^ String.concat ", " (List.map string_of_expr el) ^ ")"
   | CircleConstruct(n, el) -> n ^ " = circle(" ^ String.concat ", " (List.map string_of_expr el) ^ ")"
+  | WallStructConstruct(structName, memberName, el) -> structName ^ "." ^ memberName ^ " = wall(" ^ String.concat ", " (List.map string_of_expr el) ^ ")"
+  | BedStructConstruct(structName, memberName, el) -> structName ^ "." ^ memberName ^ " = bed(" ^ String.concat ", " (List.map string_of_expr el) ^ ")"
+  | DeskStructConstruct(structName, memberName, el) -> structName ^ "." ^ memberName ^ " = desk(" ^ String.concat ", " (List.map string_of_expr el) ^ ")"
+  | DoorStructConstruct(structName, memberName, el) -> structName ^ "." ^ memberName ^ " = door(" ^ String.concat ", " (List.map string_of_expr el) ^ ")"
+  | WindowStructConstruct(structName, memberName, el) -> structName ^ "." ^ memberName ^ " = window(" ^ String.concat ", " (List.map string_of_expr el) ^ ")"
+  | RectangleStructConstruct(structName, memberName, el) -> structName ^ "." ^ memberName ^ " = rectangle(" ^ String.concat ", " (List.map string_of_expr el) ^ ")"
+  | CircleStructConstruct(structName, memberName, el) -> structName ^ "." ^ memberName ^ " = circle(" ^ String.concat ", " (List.map string_of_expr el) ^ ")"
   | Assign(v, e) -> v ^ " = " ^ string_of_expr e
   | StructAccess(s, n) -> (string_of_expr s) ^ "." ^ n
   | Call(f, el) ->

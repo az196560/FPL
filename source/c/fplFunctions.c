@@ -39,6 +39,37 @@ void put_circle(float x, float y, float diameter, float shiftX, float shiftY){
     printf("x:%f, y:%f, diameter:%f, shiftX:%f, shigtY:%f\n", x, y, diameter, shiftX, shiftY);
 }
 
+void put(int degree, int type, float x, float y, float r, float shiftX, float shiftY){
+    printf("Hello put\n");
+    printf("type:%d, degree:%d, x:%f, y:%f, r:%f, shiftX:%f, shigtY:%f\n", type, degree, x, y, r, shiftX, shiftY);
+
+    switch (type) {
+        case 0:
+            put_wall(x, y, degree, shiftX, shiftY);
+            break;
+        case 1:
+            put_bed(x, y, degree, shiftX, shiftY);
+            break;
+        case 2:
+            put_desk(x, y, degree, shiftX, shiftY);
+            break;
+        case 3:
+            put_door(x, y, degree, shiftX, shiftY);
+            break;
+        case 4:
+            put_window(x, y, degree, shiftX, shiftY);
+            break;
+        case 5:
+            put_rectangle(x, y, degree, shiftX, shiftY);
+            break;
+        case 6:
+            put_circle(x, y, degree, shiftX, shiftY);
+            break;
+        default:
+            break;
+    }
+}
+
 void render(){
     printf("Hello render\n");
 }
@@ -46,6 +77,7 @@ void render(){
 #ifdef BUILD_TEST
 int main()
 {
+  put(0, 0, 0.0, 1.0, 1.0, 400.0, 500.0);
   put_wall(0.0, 1.0, 90, 400.0, 500.0);
   put_bed(0.0, 1.0, 180, 600.0, 700.0);
   put_desk(0.0, 1.0, 270, 100.0, 200.0);

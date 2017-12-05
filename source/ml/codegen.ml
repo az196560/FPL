@@ -22,8 +22,8 @@ module StringMap = Map.Make(String)
 exception FPL_err of string;;
 
 (* global variable *)
-let localsTypeMap = StringMap.empty;;
 let fplObjectValueMap = ref StringMap.empty;;
+let structMemberMap = ref StringMap.empty;;
 
 let translate program =
   let context = L.global_context () in
@@ -35,7 +35,7 @@ let translate program =
   and str_t  = L.pointer_type (L.i8_type context)
   and void_t = L.void_type context
   and fplObject_t = L.i16_type context
-  and struct_t n = L.named_struct_type context n in
+  and struct_t n = L.i16_type context in
 
   let ltype_of_typ = function
       A.Int -> i32_t
@@ -59,21 +59,25 @@ let translate program =
     [] -> map
     | pair::pairs -> getMap (StringMap.add (snd pair) (fst pair) map) pairs in
  
-  let printLocalsTypeMap m =
-      StringMap.iter (fun key value -> Printf.printf "%s -> %s\n" key (A.string_of_typ value)) m in
- 
   let printList l =
       List.iter (fun n -> Printf.printf "%s, " (A.string_of_expr n)) l;  Printf.printf "\n" in
 
   let printObjectValueMap m =
      StringMap.iter (fun key value -> Printf.printf "%s: " key;  printList value) m in
+  
+  let printStringList l =
+      List.iter (fun n -> Printf.printf "%s, " n) l;  Printf.printf "\n" in
     
+  let printStructMemberMap m =
+     StringMap.iter (fun key value -> Printf.printf "%s: " key;  printStringList value) m in
+
     (* Declare ensureInt and ensureFloat function *)
   let ensureInt c = 
       if L.type_of c = flt_t then (L.const_fptosi c i32_t) else c in
     
   let ensureFloat c =
       if L.type_of c = flt_t then c else (L.const_sitofp c flt_t) in
+
 
   (* Declare each global variable; remember its value in a map *)
   let global_vars =
@@ -97,6 +101,10 @@ let translate program =
   (* Declare the built-in drawRec() function *)
   let drawRec_t = L.function_type i32_t [| i32_t |] in
   let drawRec_func = L.declare_function "drawRec" drawRec_t the_module in
+  
+  (* Declare the built-in put() function *)
+  let put_t = L.function_type i32_t [|i32_t; i32_t; flt_t; flt_t; flt_t; flt_t; flt_t|] in
+  let put_func = L.declare_function "put" put_t the_module in
   
   (* Declare the built-in put_wall() function *)
   let put_wall_t = L.function_type i32_t [|flt_t; flt_t; i32_t; flt_t; flt_t|] in
@@ -158,10 +166,11 @@ let translate program =
 	let local = L.build_alloca (ltype_of_typ t) n builder in
 	ignore (L.build_store p local builder);
 	StringMap.add n local m in
+    
 
-      let add_local m (t, n) =
-	let local_var = L.build_alloca (ltype_of_typ t) n builder
-	in StringMap.add n local_var m in
+    let add_local m (t, n) =
+        let local_var = L.build_alloca (ltype_of_typ t) n builder;
+    in StringMap.add n local_var m in
 
       let formals = List.fold_left2 add_formal StringMap.empty fdecl.A.formals
           (Array.to_list (L.params the_function)) in
@@ -171,8 +180,9 @@ let translate program =
     let lookup n = try StringMap.find n local_vars
                    with Not_found -> StringMap.find n global_vars
     in
-    let localsTypeMap = getMap StringMap.empty fdecl.A.locals in
-    (*printLocalsTypeMap localsTypeMap;*)
+    List.iter (fun pair -> if not(StringMap.mem (snd pair) !structMemberMap) then 
+        (structMemberMap := StringMap.add (snd pair) ["Dummy"] !structMemberMap)) fdecl.A.locals;
+    (*printStructMemberMap !structMemberMap;*)
 
     (* Construct code for an expression; return its value *)
     let rec expr builder = function
@@ -183,14 +193,127 @@ let translate program =
       | A.StringLit s -> L.build_global_stringptr (s^"\x00") "strptr" builder
       | A.Noexpr -> L.const_int i32_t 0
       | A.Id s -> L.build_load (lookup s) s builder
-      | A.WallConstruct (n, act) | A.BedConstruct (n, act) | A.DeskConstruct (n, act) | A.DoorConstruct (n, act) |
-        A.WindowConstruct (n, act) | A.RectangleConstruct (n, act) ->
-              fplObjectValueMap := StringMap.add n (act@[A.Literal(0)]) !fplObjectValueMap;
+      | A.WallStructConstruct (structName, memberName, act) ->
+              let fullName = structName ^ "." ^ memberName in
+              let members = StringMap.find structName !structMemberMap in
+              let membersWithotDummy = List.filter (fun member -> (compare member "Dummy") != 0) members in
+              let newMembers = membersWithotDummy @ [fullName] in
+              structMemberMap := StringMap.add structName newMembers !structMemberMap;
+              (*printStructMemberMap !structMemberMap;*)
+              (* append type wall:0 and degree:0 *)
+              fplObjectValueMap := StringMap.add fullName ([A.Literal(0); A.Literal(0)] @ act @ [A.FLiteral(0.0)]) !fplObjectValueMap;
               (*printObjectValueMap !fplObjectValueMap;*)
               L.const_int i32_t 0
-      | A.CircleConstruct (n, act) ->
-              fplObjectValueMap := StringMap.add n act !fplObjectValueMap;
+      | A.BedStructConstruct (structName, memberName, act) ->
+              let fullName = structName ^ "." ^ memberName in
+              let members = StringMap.find structName !structMemberMap in
+              let membersWithotDummy = List.filter (fun member -> (compare member "Dummy") != 0) members in
+              let newMembers = membersWithotDummy @ [fullName] in
+              structMemberMap := StringMap.add structName newMembers !structMemberMap;
+              (* append type bed:1 and degree:0 *)
+              fplObjectValueMap := StringMap.add fullName ([A.Literal(0); A.Literal(1)] @ act @ [A.FLiteral(0.0)]) !fplObjectValueMap;
+              L.const_int i32_t 0
+      | A.DeskStructConstruct (structName, memberName, act) ->
+              let fullName = structName ^ "." ^ memberName in
+              let members = StringMap.find structName !structMemberMap in
+              let membersWithotDummy = List.filter (fun member -> (compare member "Dummy") != 0) members in
+              let newMembers = membersWithotDummy @ [fullName] in
+              structMemberMap := StringMap.add structName newMembers !structMemberMap;
+              (* append type desk:2 and degree:0 *)
+              fplObjectValueMap := StringMap.add fullName ([A.Literal(0); A.Literal(2)] @ act @ [A.FLiteral(0.0)]) !fplObjectValueMap;
+              L.const_int i32_t 0
+      | A.DoorStructConstruct (structName, memberName, act) ->
+              let fullName = structName ^ "." ^ memberName in
+              let members = StringMap.find structName !structMemberMap in
+              let membersWithotDummy = List.filter (fun member -> (compare member "Dummy") != 0) members in
+              let newMembers = membersWithotDummy @ [fullName] in
+              structMemberMap := StringMap.add structName newMembers !structMemberMap;
+              (* append type door:3 and degree:0 *)
+              fplObjectValueMap := StringMap.add fullName ([A.Literal(0); A.Literal(3)] @ act @ [A.FLiteral(0.0)]) !fplObjectValueMap;
+              L.const_int i32_t 0
+      | A.WindowStructConstruct (structName, memberName, act) ->
+              let fullName = structName ^ "." ^ memberName in
+              let members = StringMap.find structName !structMemberMap in
+              let membersWithotDummy = List.filter (fun member -> (compare member "Dummy") != 0) members in
+              let newMembers = membersWithotDummy @ [fullName] in
+              structMemberMap := StringMap.add structName newMembers !structMemberMap;
+              (* append type window:4 and degree:0 *)
+              fplObjectValueMap := StringMap.add fullName ([A.Literal(0); A.Literal(4)] @ act @ [A.FLiteral(0.0)]) !fplObjectValueMap;
+              L.const_int i32_t 0
+      | A.RectangleStructConstruct (structName, memberName, act) ->
+              let fullName = structName ^ "." ^ memberName in
+              let members = StringMap.find structName !structMemberMap in
+              let membersWithotDummy = List.filter (fun member -> (compare member "Dummy") != 0) members in
+              let newMembers = membersWithotDummy @ [fullName] in
+              structMemberMap := StringMap.add structName newMembers !structMemberMap;
+              (* append type rectangle:5 and degree:0 *)
+              fplObjectValueMap := StringMap.add fullName ([A.Literal(0); A.Literal(5)] @ act @ [A.FLiteral(0.0)]) !fplObjectValueMap;
+              L.const_int i32_t 0
+      | A.CircleStructConstruct (structName, memberName, act) ->
+              let fullName = structName ^ "." ^ memberName in
+              let members = StringMap.find structName !structMemberMap in
+              let membersWithotDummy = List.filter (fun member -> (compare member "Dummy") != 0) members in
+              let newMembers = membersWithotDummy @ [fullName] in
+              structMemberMap := StringMap.add structName newMembers !structMemberMap;
+              (* append type circle:6 and degree:0 *)
+              fplObjectValueMap := StringMap.add fullName ([A.Literal(0); A.Literal(6)] @ act) !fplObjectValueMap;
+              L.const_int i32_t 0
+      | A.WallConstruct (variableName, act) ->
+              let member = StringMap.find variableName !structMemberMap in
+              let memberWithotDummy = List.filter (fun member -> (compare member "Dummy") != 0) member in
+              let newMember = memberWithotDummy @ [variableName] in
+              structMemberMap := StringMap.add variableName newMember !structMemberMap;
+              (* append type wall:0 and degree:0 *)
+              fplObjectValueMap := StringMap.add variableName ([A.Literal(0); A.Literal(0)] @ act @ [A.FLiteral(0.0)]) !fplObjectValueMap;
               (*printObjectValueMap !fplObjectValueMap;*)
+              L.const_int i32_t 0
+      | A.BedConstruct (variableName, act) ->
+              let member = StringMap.find variableName !structMemberMap in
+              let memberWithotDummy = List.filter (fun member -> (compare member "Dummy") != 0) member in
+              let newMember = memberWithotDummy @ [variableName] in
+              structMemberMap := StringMap.add variableName newMember !structMemberMap;
+              (* append type bed:1 and degree:0 *)
+              fplObjectValueMap := StringMap.add variableName ([A.Literal(0); A.Literal(1)] @ act @ [A.FLiteral(0.0)]) !fplObjectValueMap;
+              L.const_int i32_t 0
+      | A.DeskConstruct (variableName, act) ->
+              let member = StringMap.find variableName !structMemberMap in
+              let memberWithotDummy = List.filter (fun member -> (compare member "Dummy") != 0) member in
+              let newMember = memberWithotDummy @ [variableName] in
+              structMemberMap := StringMap.add variableName newMember !structMemberMap;
+              (* append type desk:2 and degree:0 *)
+              fplObjectValueMap := StringMap.add variableName ([A.Literal(0); A.Literal(2)] @ act @ [A.FLiteral(0.0)]) !fplObjectValueMap;
+              L.const_int i32_t 0
+      | A.DoorConstruct (variableName, act) ->
+              let member = StringMap.find variableName !structMemberMap in
+              let memberWithotDummy = List.filter (fun member -> (compare member "Dummy") != 0) member in
+              let newMember = memberWithotDummy @ [variableName] in
+              structMemberMap := StringMap.add variableName newMember !structMemberMap;
+              (* append type door:3 and degree:0 *)
+              fplObjectValueMap := StringMap.add variableName ([A.Literal(0); A.Literal(3)] @ act @ [A.FLiteral(0.0)]) !fplObjectValueMap;
+              L.const_int i32_t 0
+      | A.WindowConstruct (variableName, act) ->
+              let member = StringMap.find variableName !structMemberMap in
+              let memberWithotDummy = List.filter (fun member -> (compare member "Dummy") != 0) member in
+              let newMember = memberWithotDummy @ [variableName] in
+              structMemberMap := StringMap.add variableName newMember !structMemberMap;
+              (* append type window:4 and degree:0 *)
+              fplObjectValueMap := StringMap.add variableName ([A.Literal(0); A.Literal(4)] @ act @ [A.FLiteral(0.0)]) !fplObjectValueMap;
+              L.const_int i32_t 0
+      | A.RectangleConstruct (variableName, act) ->
+              let member = StringMap.find variableName !structMemberMap in
+              let memberWithotDummy = List.filter (fun member -> (compare member "Dummy") != 0) member in
+              let newMember = memberWithotDummy @ [variableName] in
+              structMemberMap := StringMap.add variableName newMember !structMemberMap;
+              (* append type rectangle:5 and degree:0 *)
+              fplObjectValueMap := StringMap.add variableName ([A.Literal(0); A.Literal(5)] @ act @ [A.FLiteral(0.0)]) !fplObjectValueMap;
+              L.const_int i32_t 0
+      | A.CircleConstruct (variableName, act) ->
+              let member = StringMap.find variableName !structMemberMap in
+              let memberWithotDummy = List.filter (fun member -> (compare member "Dummy") != 0) member in
+              let newMember = memberWithotDummy @ [variableName] in
+              structMemberMap := StringMap.add variableName newMember !structMemberMap;
+              (* append type circle:6 and degree:0 *)
+              fplObjectValueMap := StringMap.add variableName ([A.Literal(0); A.Literal(6)] @ act) !fplObjectValueMap;
               L.const_int i32_t 0
       | A.Binop (e1, op, e2) ->
 	  let e1' = expr builder e1
@@ -256,62 +379,28 @@ let translate program =
       | A.Call ("printbig", [e]) ->
 	  L.build_call printbig_func [| (expr builder e) |] "printbig" builder
       | A.Call ("put", act) ->
-	 let actuals = List.rev (List.map (expr builder) (List.rev act)) in
-     let fplObject = A.string_of_expr (List.hd act) in 
-     let typ = StringMap.find fplObject localsTypeMap in 
-        if typ = A.Wall  then (
-            let act = List.tl act in
-            let attributes = StringMap.find fplObject !fplObjectValueMap in
-	        let parameters = List.map (expr builder) (attributes@act) in
-            (*printList attributes;*)
-	        L.build_call put_wall_func (Array.of_list parameters) "put_wall" builder)
-        else if typ = A.Bed then (
-            let act = List.tl act in
-            let attributes = StringMap.find fplObject !fplObjectValueMap in
-	        let parameters = List.map (expr builder) (attributes@act) in
-	        L.build_call put_bed_func (Array.of_list parameters) "put_bed" builder)
-        else if typ = A.Desk then (
-            let act = List.tl act in
-            let attributes = StringMap.find fplObject !fplObjectValueMap in
-	        let parameters = List.map (expr builder) (attributes@act) in
-	        L.build_call put_desk_func (Array.of_list parameters) "put_desk" builder)
-        else if typ = A.Door then (
-            let act = List.tl act in
-            let attributes = StringMap.find fplObject !fplObjectValueMap in
-	        let parameters = List.map (expr builder) (attributes@act) in
-	        L.build_call put_door_func (Array.of_list parameters) "put_door" builder)
-        else if typ = A.Window then (
-            let act = List.tl act in
-            let attributes = StringMap.find fplObject !fplObjectValueMap in
-	        let parameters = List.map (expr builder) (attributes@act) in
-	        L.build_call put_window_func (Array.of_list parameters) "put_window" builder)
-        else if typ = A.Rectangle then (
-            let act = List.tl act in
-            let attributes = StringMap.find fplObject !fplObjectValueMap in
-	        let parameters = List.map (expr builder) (attributes@act) in
-	        L.build_call put_rectangle_func (Array.of_list parameters) "put_rectangle" builder)
-        else if typ = A.Circle then (
-            let act = List.tl act in
-            let attributes = StringMap.find fplObject !fplObjectValueMap in
-	        let parameters = List.map (expr builder) (attributes@act) in
-	        L.build_call put_circle_func (Array.of_list parameters) "put_circle" builder)
-        else (
-            L.const_int i32_t 0)
+     let fplStruct = A.string_of_expr (List.hd act) in 
+     let structMembers = StringMap.find fplStruct !structMemberMap in
+     let invokePut offset structMember = 
+       let attributes = StringMap.find structMember !fplObjectValueMap in
+	   let parameters = List.map (expr builder) (attributes @ offset) in
+       (*printList attributes;*)
+	   ignore (L.build_call put_func (Array.of_list parameters) "put" builder) in
+     let offset = List.tl act in
+        List.iter (fun structMember -> invokePut offset structMember) structMembers;
+        L.const_int i32_t 0
       | A.Call ("rotate", act) ->
-     let fplObject = A.string_of_expr (List.hd act) in 
-     let typ = StringMap.find fplObject localsTypeMap in 
-        if typ = A.Circle  then (
-            L.const_int i32_t 0
-        )
-        else(
-            let degree = List.nth act 1 in 
-            let attributes = List.rev (StringMap.find fplObject !fplObjectValueMap) in
-            let attributes = [degree] @ (List.tl attributes) in
-            let attributes = List.rev (attributes) in
-            (*printList attributes;*)
-            fplObjectValueMap := StringMap.remove fplObject !fplObjectValueMap;
-            fplObjectValueMap := StringMap.add fplObject attributes !fplObjectValueMap;
-            L.const_int i32_t 0)
+     let fplStruct = A.string_of_expr (List.hd act) in 
+     let structMembers = StringMap.find fplStruct !structMemberMap in
+     let rotate degree structMember = 
+       let attributes = StringMap.find structMember !fplObjectValueMap in
+       let newAttributes = [degree] @ (List.tl attributes) in
+       (*printList attributes;*)
+       fplObjectValueMap := StringMap.remove structMember !fplObjectValueMap;
+       fplObjectValueMap := StringMap.add structMember newAttributes !fplObjectValueMap in
+     let degree = List.nth act 1 in 
+        List.iter (fun structMember -> rotate degree structMember) structMembers;
+        L.const_int i32_t 0
       | A.Call ("render", act) ->
 	 let parameters = List.map (expr builder) (act) in
          L.build_call render_func (Array.of_list parameters) "render" builder
