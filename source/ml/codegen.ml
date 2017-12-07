@@ -21,10 +21,6 @@ module StringMap = Map.Make(String)
 (* Error message *)
 exception FPL_err of string;;
 
-(* global variable *)
-let fplObjectValueMap = ref StringMap.empty;;
-let structMemberMap = ref StringMap.empty;;
-
 let translate program =
   let context = L.global_context () in
   let the_module = L.create_module context "Fpl"
@@ -122,6 +118,9 @@ let translate program =
   
   (* Fill in the body of the given function *)
   let build_function_body fdecl =
+    (* fpl map in the function scope *)
+    let fplObjectValueMap = ref StringMap.empty in
+    let structMemberMap = ref StringMap.empty in
     let (the_function, _) = StringMap.find fdecl.A.fname function_decls in
     let builder = L.builder_at_end context (L.entry_block the_function) in
 
