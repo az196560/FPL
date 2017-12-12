@@ -2,10 +2,10 @@ int main()
 {
   wall a;
   wall b;
-  a = wall(1.0, 2.0);
-  b = wall(3.0, 4.0);
-  put(a, 1.0, 1.0);
-  put(b, 2.0, 2.0);
+  a = wall(5.0, 0.15);
+  b = wall(0.3, 5.0);
+  put(a, 0.0, 0.0);
+  put(b, 3.0, 3.0);
   render();
   return 0;
 }

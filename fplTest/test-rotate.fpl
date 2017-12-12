@@ -1,18 +1,14 @@
 int main()
 {
   wall a;
-  circle b;
-  a = wall(1.0, 2.0);
-  b = circle(3.0, 4.0, 1.0);
+  a = wall(4.0, 0.5);
   printS("before roate:");
-  put(a, 100.0, 200.0);
-  put(b, 300.0, 400.0);
+  put(a, 1.0, 1.0);
 
   printS("after roate 90 degree....................");
   rotate(a, 90);
 
-  put(a, 100.0, 200.0);
-  put(b, 300.0, 400.0);
+  put(a, 1.0, 1.0);
   render();
   return 0;
 }
