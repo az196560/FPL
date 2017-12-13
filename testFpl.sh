@@ -16,8 +16,12 @@ LLC="llc"
 CC="gcc"
 
 CPATH="source/c"
+LFLAGS=" -lGL -lGLU -lglut -lm"
 
-LFLAGS="-lGL -lGLU -lglut -lm"
+if [ "$(uname)" == "Darwin" ]; then
+    LFLAGS=" -framework OpenGL -framework GLUT"
+fi
+
 
 # Path to the fpl compiler.  Usually "./fpl.native"
 # Try "_build/fpl.native" if ocamlbuild was unable to create a symbolic link.
