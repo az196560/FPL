@@ -256,7 +256,7 @@ void draw()
 		    glVertex3f(data[i][1], data[i][5],-5.0f);//output vertex 
             glEnd(); //End quadrilateral coordinates
         }
-        // draw a wall using retangle
+        // draw a window using retangle
         if((int) data[i][0] == 5)
         {                
             glTranslatef(0.0f, 0.0f, 0.0f);
@@ -272,6 +272,18 @@ void draw()
             glColor3f(0, 0, 0);	//Trapezoid
 	        glVertex3f(data[i][4], data[i][2]*3/4+data[i][5]/4, -5.0f);
 	        glVertex3f(data[i][1], data[i][2]*3/4+data[i][5]/4, -5.0f);
+	        glEnd(); //End quadrilateral coordinates
+        }
+        if((int) data[i][0] == 6)
+        {                
+            glTranslatef(0.0f, 0.0f, 0.0f);
+            glRotatef(data[i][3], (data[i][1]+data[i][4])/2, (data[i][2]+data[i][5])/2, -5.0f);
+	        glBegin(GL_LINE_LOOP); //Begin quadrilateral coordinates
+            glColor3f(0, 0, 0);	//Trapezoid
+	        glVertex3f(data[i][4], data[i][5], -5.0f);
+	        glVertex3f(data[i][1], data[i][5], -5.0f);
+	        glVertex3f(data[i][1], data[i][2], -5.0f);
+	        glVertex3f(data[i][4], data[i][2], -5.0f);
 	        glEnd(); //End quadrilateral coordinates
         }
         
