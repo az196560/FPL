@@ -2,10 +2,10 @@ int main()
 {
   rectangle a;
   rectangle b;
-  a = rectangle(1.0, 2.0);
-  b = rectangle(3.0, 4.0);
-  put(a, 100.0, 200.0);
-  put(b, 300.0, 400.0);
+  a = rectangle(0.1, 0.2);
+  b = rectangle(0.3, 0.4);
+  put(a, 1.0, 2.0);
+  put(b, 3.0, 4.0);
   render();
   return 0;
 }

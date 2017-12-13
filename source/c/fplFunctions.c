@@ -160,7 +160,8 @@ void draw()
     
     int len = index;
     printf("len : %d\n",len);
-    for(int i = 0; i < len; i++)
+    int i;
+    for(i = 0; i < len; i++)
     {
         // draw a wall using retangle
         if((int) data[i][0] == 1)
@@ -244,7 +245,8 @@ void draw()
             float x = data[i][1];
             float y = data[i][5];
 	        float r = data[i][1] - data[i][4];
-            for(int ii = 0; ii < 100; ii++) 
+            int ii;
+            for(ii = 0; ii < 100; ii++) 
 	        {    
 		        float theta =  3.1415926f * ii / 300;//get the current angle 
 		        float x1 = r * cosf(theta);//calculate the x component 

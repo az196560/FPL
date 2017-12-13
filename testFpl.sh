@@ -13,9 +13,11 @@ LLI="lli"
 LLC="llc"
 
 # Path to the C compiler
-CC="cc"
+CC="gcc"
 
 CPATH="source/c"
+
+LFLAGS="-lGL -lGLU -lglut -lm"
 
 # Path to the fpl compiler.  Usually "./fpl.native"
 # Try "_build/fpl.native" if ocamlbuild was unable to create a symbolic link.
@@ -96,7 +98,7 @@ Check() {
     generatedfiles="$generatedfiles ${basename}.ll ${basename}.s ${basename}.exe ${basename}.out" &&
     Run "$FPL" "$1" ">" "${basename}.ll" &&
     Run "$LLC" "${basename}.ll" ">" "${basename}.s" &&
-    Run "$CC" "-o" "${basename}.exe" "${basename}.s" "${CPATH}/printbig.o" "${CPATH}/fplFunctions.o"
+    Run "$CC" "-o" "${basename}.exe" "${basename}.s" "${LFLAGS}"" ${CPATH}/printbig.o" "${CPATH}/fplFunctions.o"
     Run "./${basename}.exe"
     #Compare ${basename}.out ${reffile}.out ${basename}.diff
 

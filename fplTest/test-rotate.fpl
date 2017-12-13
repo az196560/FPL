@@ -1,14 +1,19 @@
 int main()
 {
   wall a;
-  a = wall(4.0, 0.5);
+  door b;
+  a = wall(0.2, 0.4);
+  b = door(0.6, 0.6);
   printS("before roate:");
   put(a, 1.0, 1.0);
+  put(b, 2.0, 2.0);
 
   printS("after roate 90 degree....................");
   rotate(a, 90);
+  rotate(b, 90);
 
-  put(a, 1.0, 1.0);
+  put(a, 3.0, 3.0);
+  put(b, 4.0, 4.0);
   render();
   return 0;
 }

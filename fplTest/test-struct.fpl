@@ -13,10 +13,10 @@ struct Bedroom {
 
 int test(){
   Bedroom r;
-  r.e = window(7.0, 8.0);
-  r.f = rectangle(9.0, 10.0);
-  r.g = circle(11.0, 12.0, 1.0);
-  put(r, 50.0, 50.0);
+  r.e = window(0.7, 0.8);
+  r.f = rectangle(0.9, 1.0);
+  r.g = circle(1.1, 1.2, 1.0);
+  put(r, 5.0, 5.0);
 }
 
 int main()
@@ -25,18 +25,18 @@ int main()
   Bedroom r;
   wall a;
 
-  k.a = wall(1.0, 2.0);
-  k.b = bed(3.0, 4.0);
-  k.c = desk(5.0, 6.0);
-  k.d = door(7.0, 8.0);
-  r.e = window(7.0, 8.0);
-  r.f = rectangle(9.0, 10.0);
-  r.g = circle(11.0, 12.0, 1.0);
+  k.a = wall(0.1, 0.2);
+  k.b = bed(0.3, 0.4);
+  k.c = desk(0.5, 0.6);
+  k.d = door(0.7, 0.8);
+  r.e = window(0.7, 0.8);
+  r.f = rectangle(0.9, 1.0);
+  r.g = circle(1.0, 1.0, 1.0);
   test();
-  a = wall(5.0, 5.0);
-  put(k, 10.0, 20.0);
-  put(r, 30.0, 40.0);
-  put(a, 50.0, 60.0);
+  a = wall(0.5, 0.5);
+  put(k, 1.0, 2.0);
+  put(r, 3.0, 4.0);
+  put(a, 5.0, 6.0);
   render();
   return 0;
 }
