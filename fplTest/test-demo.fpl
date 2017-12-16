@@ -1,0 +1,51 @@
+int main()
+{
+  bed b;
+  desk d;
+  door dr;
+  wall upperMiddle;
+  wall lowerMiddle;
+  wall upperLeft;
+  wall upperRight;
+  wall lowerLeft;
+  wall lowerRight;
+  wall left;
+  wall right;
+  wall bedBath;
+  window w;
+  
+  b = bed(3.0, 2.1);
+  d = desk(1.8, 2.75);
+  dr = door(1.0, 0.5);
+  upperMiddle = wall(0.15, 5.0);
+  lowerMiddle = wall(0.15, 3.7);
+  upperLeft = wall(1.5, 0.3);
+  upperRight = wall(1.5, 0.3);
+  lowerLeft = wall(6.0, 0.3);
+  lowerRight = wall(2.7, 0.3);
+  left = wall(0.3, 10.0);
+  right = wall(0.3, 10.0);
+  bedBath = wall(0.15, 3.2);
+  w = window(7.0, 0.3);
+
+  put(b, 0.3, 6.5);
+  put(d, 7.8, 6.5);
+  put(dr, 6.0, 0.3);
+  put(upperMiddle, 5.0, 5.0);
+  put(lowerMiddle, 5.0, 0.0);
+  put(upperLeft, 0.0, 9.7);
+  put(upperRight, 8.5, 9.7);
+  put(lowerLeft, 0.0, 0.0);
+  put(lowerRight, 7.0, 0.0);
+  put(left, 0.0, 0.0);
+  put(right, 9.7, 0.0);
+  put(w, 1.5, 9.7);
+ 
+  rotate(bedBath,90);
+  put(bedBath, 1.8 , 2.0);
+
+  render();
+  return 0;
+}
+
+

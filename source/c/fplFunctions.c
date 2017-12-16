@@ -11,7 +11,7 @@
 /* OpenGL coordinate range X = [-2,2], Y = [-2, 2], coordinate obtained from FPL is X=[0,10], Y = [0,10] , so we would do a coordinate calibration */
 
 //global float array to store every object's data to be drawn
-static float data[10][6] =  {{0,0,0,0,0,0}};
+static float data[64][6] =  {{0,0,0,0,0,0}};
 static int index = 0;
 
 //Called when a key is pressed
