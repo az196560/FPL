@@ -115,8 +115,14 @@ void put_rectangle(float x, float y, int degree, float shiftX, float shiftY){
 
 // no circle at all.............
 void put_circle(float x, float y, float diameter, float shiftX, float shiftY){
-    printf("Hello put_circle\n");
-    printf("x:%f, y:%f, diameter:%f, shiftX:%f, shigtY:%f\n", x, y, diameter, shiftX, shiftY);
+    data[index][0] = 7.0;
+    data[index][1] = x*0.4 - 2.0 + shiftX * 0.4;
+    data[index][2] = y*0.4 - 2.0 + shiftY * 0.4;
+    data[index][3] = (float) diameter;
+    data[index][4] = shiftX*0.4 -2;
+    data[index][5] = shiftY*0.4 - 2;
+    index = index + 1;
+    printf("x:%f, y:%f, diameter:%d, shiftX:%f, shigtY:%f\n", x, y, diameter, shiftX, shiftY);
 }
 
 void put(int degree, int type, float x, float y, float r, float shiftX, float shiftY){
@@ -143,7 +149,7 @@ void put(int degree, int type, float x, float y, float r, float shiftX, float sh
             put_rectangle(x, y, degree, shiftX, shiftY);
             break;
         case 6:
-            put_circle(x, y, degree, shiftX, shiftY);
+            put_circle(x, y, r, shiftX, shiftY);
             break;
         default:
             break;
@@ -286,7 +292,23 @@ void draw()
 	        glVertex3f(data[i][4], data[i][2], -5.0f);
 	        glEnd(); //End quadrilateral coordinates
         }
-        
+        if((int) data[i][0] == 7)
+        {                
+	        glBegin(GL_LINE_LOOP);
+            glColor3f(0, 0, 0);	//Trapezoid
+            float x = data[i][1];
+            float y = data[i][2];
+	        float r = data[i][3]/2;
+            int ii;
+            for(ii = 0; ii < 600; ii++) 
+	        {    
+		        float theta =  2 * 3.1415926f * ii / 600;//get the current angle 
+		        float x1 = r * cosf(theta);//calculate the x component 
+		        float y2 = r * sinf(theta);//calculate the y component 
+		        glVertex3f(x + x1, y + y2,-5.0f);//output vertex 
+	        } 
+            glEnd(); //End quadrilateral coordinates
+        } 
     }
 	glutSwapBuffers(); //Send the 3D scene to the screen
 }
