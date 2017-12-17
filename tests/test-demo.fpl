@@ -1,12 +1,13 @@
 /* user-defined struct Toilet*/
 struct Toilet {
-    circle g;
+    circle c0;
+    circle c1;
     rectangle r;
 };
 
 /* user-defined struct Sink*/
 struct Sink {
-    circle g;
+    circle c;
     rectangle r;
 };
 
@@ -16,9 +17,10 @@ void makeBathroom(){
   Sink sink;
   rectangle bathtub;
 
-  toilet.g = circle(0.4, 0.25, 0.15);
-  toilet.r = rectangle(0.2, 0.5);
-  sink.g = circle(0.15, 0.3, 0.15);
+  toilet.c0 = circle(0.4, 0.3, 0.15);
+  toilet.c1 = circle(0.45, 0.3, 0.2);
+  toilet.r = rectangle(0.2, 0.6);
+  sink.c = circle(0.15, 0.3, 0.15);
   sink.r = rectangle(0.4, 0.6);
   bathtub = rectangle(3.0, 1.1);
 
