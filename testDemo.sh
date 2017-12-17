@@ -191,7 +191,7 @@ if [ $# -ge 1 ]
 then
     files=$@
 else
-    files="fplTest/test-demo.fpl"
+    files="tests/test-demo.fpl"
 fi
 
 for file in $files
