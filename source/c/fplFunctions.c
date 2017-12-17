@@ -122,7 +122,7 @@ void put_circle(float x, float y, float diameter, float shiftX, float shiftY){
     data[index][4] = shiftX*0.4 -2;
     data[index][5] = shiftY*0.4 - 2;
     index = index + 1;
-    printf("x:%f, y:%f, diameter:%d, shiftX:%f, shigtY:%f\n", x, y, diameter, shiftX, shiftY);
+    printf("x:%f, y:%f, diameter:%f, shiftX:%f, shigtY:%f\n", x, y, diameter, shiftX, shiftY);
 }
 
 void put(int degree, int type, float x, float y, float r, float shiftX, float shiftY){

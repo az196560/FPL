@@ -1,5 +1,35 @@
+/* user-defined struct Toilet*/
+struct Toilet {
+    circle g;
+    rectangle r;
+};
+
+/* user-defined struct Sink*/
+struct Sink {
+    circle g;
+    rectangle r;
+};
+
+/* user-defined function makeBathroom*/
+void makeBathroom(){
+  Toilet toilet;
+  Sink sink;
+  rectangle bathtub;
+
+  toilet.g = circle(0.4, 0.25, 0.15);
+  toilet.r = rectangle(0.2, 0.5);
+  sink.g = circle(0.15, 0.3, 0.15);
+  sink.r = rectangle(0.4, 0.6);
+  bathtub = rectangle(3.0, 1.1);
+
+  put(bathtub, 0.24, 0.2);
+  put(toilet, 0.24, 1.5);
+  put(sink, 0.3, 2.5);
+}
+
 int main()
 {
+  /* declare basic FPL objects */
   bed b;
   desk d;
   door dr;
@@ -11,9 +41,10 @@ int main()
   wall lowerRight;
   wall left;
   wall right;
-  wall bedBath;
+  wall bedBathWall;
   window w;
-  
+
+  /* instantiate FPL objects */
   b = bed(3.0, 2.1);
   d = desk(1.8, 2.75);
   dr = door(1.0, 0.5);
@@ -25,9 +56,10 @@ int main()
   lowerRight = wall(2.7, 0.3);
   left = wall(0.3, 10.0);
   right = wall(0.3, 10.0);
-  bedBath = wall(0.15, 3.2);
+  bedBathWall = wall(0.15, 3.2);
   w = window(7.0, 0.3);
-
+ 
+  /* put FPL objects on the specific position*/
   put(b, 0.3, 6.5);
   put(d, 7.8, 6.5);
   put(dr, 6.0, 0.3);
@@ -40,9 +72,13 @@ int main()
   put(left, 0.0, 0.0);
   put(right, 9.7, 0.0);
   put(w, 1.5, 9.7);
- 
-  rotate(bedBath,90);
-  put(bedBath, 1.8 , 2.0);
+
+  /* call user defined function */
+  makeBathroom();
+
+  /* rotate and put */
+  rotate(bedBathWall,90);
+  put(bedBathWall, 1.8 , 2.0);
 
   render();
   return 0;
