@@ -283,7 +283,7 @@ let check program =
                 " expected " ^ string_of_typ ft ^ " in " ^ string_of_expr e))))
              fd.formals actuals;
            fd.typ
-      | _ -> raise (Failure ("illegal expression"))
+      (*| _ -> raise (Failure ("illegal expression"))*)
     in
 
     let check_bool_expr e = if expr e != Bool
