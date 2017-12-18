@@ -1,0 +1,11 @@
+int main()
+{
+  float i;
+  bool b;
+
+  i = 42.0;
+  i = 10.0;
+  b = true;
+  b = false;
+  i = false; /* Fail: assigning a float to an integer */
+}

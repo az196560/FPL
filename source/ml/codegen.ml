@@ -31,7 +31,7 @@ let translate program =
   and str_t  = L.pointer_type (L.i8_type context)
   and void_t = L.void_type context
   and fplObject_t = L.i16_type context
-  and struct_t n = L.i16_type context in
+  and struct_t _ = L.i16_type context in
 
   let ltype_of_typ = function
       A.Int -> i32_t

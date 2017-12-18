@@ -1,0 +1,11 @@
+void myvoid()
+{
+  return;
+}
+
+int main()
+{
+  float i;
+
+  i = myvoid(); /* Fail: assigning a void to a float */
+}

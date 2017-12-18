@@ -1,0 +1,19 @@
+struct Kitchen {
+    wall a;
+    bed  b;
+    desk c;
+    door d;
+};
+
+
+int main()
+{
+  Kitchen k;
+
+  k.a = wall(0.1, 0.2);
+  k.b = door(0.3, 0.4);
+  k.c = desk(0.5, 0.6);
+  k.d = door(0.7, 0.8);
+
+  return 0;
+}

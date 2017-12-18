@@ -1,0 +1,17 @@
+struct Kitchen {
+    wall a;
+    bed  b;
+    desk c;
+    door d;
+};
+
+
+int main()
+{
+  Kitchen k;
+
+  k.e = wall(0.1, 0.2);
+
+
+  return 0;
+}

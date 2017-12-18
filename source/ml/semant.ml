@@ -29,10 +29,8 @@ let check program =
   (* Raise an exception of the given rvalue type cannot be assigned to
      the given lvalue type *)
   let check_assign lvaluet rvaluet err =
-     lvaluet
-     (*)
-     if (lvaluet=Int && ((rvaluet=Wall)||(rvaluet=Bed)||(rvaluet=Desk)||(rvaluet=Door)||(rvaluet=Window)||(rvaluet=Rectangle)||(rvaluet=Circle))) then lvaluet
-     else if (Pervasives.(=) lvaluet rvaluet) then lvaluet else raise err *)
+     if (lvaluet=Int) then lvaluet
+     else if (Pervasives.(=) lvaluet rvaluet) then lvaluet else raise err 
   in
    
   (**** Checking Global Variables ****)
@@ -40,7 +38,9 @@ let check program =
   List.iter (check_not_void (fun n -> "illegal void global " ^ n)) program.globals;
    
   report_duplicate (fun n -> "duplicate global " ^ n) (List.map snd program.globals);
-
+  (**** Checking structs ****)
+  report_duplicate (fun n -> "duplicate struct " ^ n)
+    (List.map (fun fd -> fd.struct_name) program.structs);
   (**** Checking Functions ****)
 
   if List.mem "print" (List.map (fun fd -> fd.fname) program.functions)
@@ -87,7 +87,7 @@ let check program =
 
   let _ = function_decl "main" in (* Ensure "main" is defined *)
 
-  let check_function func =
+  let check_function func=
 
     List.iter (check_not_void (fun n -> "illegal void formal " ^ n ^
       " in " ^ func.fname)) func.formals;
@@ -100,20 +100,29 @@ let check program =
 
     report_duplicate (fun n -> "duplicate local " ^ n ^ " in " ^ func.fname)
       (List.map snd func.locals);
-
     (* Type of each variable (global, formal, or local *)
     let symbols = List.fold_left (fun m (t, n) -> StringMap.add n t m)
-	StringMap.empty (program.globals @ func.formals @ func.locals )
+	     StringMap.empty (program.globals @ func.formals @ func.locals)
+    in
+    let struct_decls = List.fold_left (fun m sd -> StringMap.add sd.struct_name sd m)
+                        StringMap.empty program.structs
+    in
+    let struct_decl s = try StringMap.find s struct_decls
+      with Not_found -> raise (Failure ("unrecognized struct " ^ s))
     in
 
     let type_of_identifier s =
       try StringMap.find s symbols
       with Not_found -> raise (Failure ("undeclared identifier " ^ s))
     in
+    let type_of_identifier_s s k t=
+      try StringMap.find s k
+      with Not_found -> raise (Failure ("undeclared identifier " ^ t ^ "." ^s))
+    in
 
 (* check if given type is an int or float *)
     let isNumType t = if (t = Int || t = Float) then true else false in
-
+    
     (* Return the type of an expression or throw an exception *)
     let rec expr = function
 	    Literal _ -> Int
@@ -122,54 +131,117 @@ let check program =
       | CharLit _ -> Char
       | StringLit _ -> String
       | Id s -> type_of_identifier s
-      | WallStructConstruct(structName, memberName, el) -> Wall
-      | BedStructConstruct(structName, memberName, el) -> Bed
-      | DeskStructConstruct(structName, memberName, el) -> Desk
-      | DoorStructConstruct(structName, memberName, el) -> Door
-      | WindowStructConstruct(structName, memberName, el) -> Window
-      | RectangleStructConstruct(structName, memberName, el) -> Rectangle
-      | CircleStructConstruct(structName, memberName, el) -> Circle
+      | WallStructConstruct(structName, memberName, _) -> 
+        let sd = struct_decl (string_of_typ (type_of_identifier structName)) in
+        let ss = List.fold_left (fun m (t, n) -> StringMap.add n t m)
+          StringMap.empty (sd.members)
+        in
+        let name =  type_of_identifier_s memberName ss structName in
+        if(name=Wall) then Wall
+          else raise(Failure ("Excepted type wall for "^ structName ^"."^ memberName ^", got "^string_of_typ name))
+      | BedStructConstruct(structName, memberName, _) -> 
+        let sd = struct_decl (string_of_typ (type_of_identifier structName)) in
+        let ss = List.fold_left (fun m (t, n) -> StringMap.add n t m)
+          StringMap.empty (sd.members)
+        in
+        let name =  type_of_identifier_s memberName ss structName in
+        if(name=Bed) then Bed
+          else raise(Failure ("Excepted type bed for "^ structName ^"."^ memberName ^", got "^string_of_typ name))
+      | DeskStructConstruct(structName, memberName, _) -> 
+        let sd = struct_decl (string_of_typ (type_of_identifier structName)) in
+        let ss = List.fold_left (fun m (t, n) -> StringMap.add n t m)
+          StringMap.empty (sd.members)
+        in
+        let name =  type_of_identifier_s memberName ss structName in
+        if(name=Desk) then Desk
+          else raise(Failure ("Excepted type desk for "^ structName ^"."^ memberName ^", got "^string_of_typ name))
+      | DoorStructConstruct(structName, memberName, _) -> 
+        let sd = struct_decl (string_of_typ (type_of_identifier structName)) in
+        let ss = List.fold_left (fun m (t, n) -> StringMap.add n t m)
+          StringMap.empty (sd.members)
+        in
+        let name =  type_of_identifier_s memberName ss structName in
+        if(name=Door) then Door
+          else raise(Failure ("Excepted type door for "^ structName ^"."^ memberName ^", got "^string_of_typ name))
+      | WindowStructConstruct(structName, memberName, _) -> 
+        let sd = struct_decl (string_of_typ (type_of_identifier structName)) in
+        let ss = List.fold_left (fun m (t, n) -> StringMap.add n t m)
+          StringMap.empty (sd.members)
+        in
+        let name =  type_of_identifier_s memberName ss structName in
+        if(name=Window) then Window
+          else raise(Failure ("Excepted type window for "^ structName ^"."^ memberName ^", got "^string_of_typ name))
+      | RectangleStructConstruct(structName, memberName, _) -> 
+        let sd = struct_decl (string_of_typ (type_of_identifier structName)) in
+        let ss = List.fold_left (fun m (t, n) -> StringMap.add n t m)
+          StringMap.empty (sd.members)
+        in
+        let name =  type_of_identifier_s memberName ss structName in
+        if(name=Rectangle) then Rectangle
+          else raise(Failure ("Excepted type rectangle for "^ structName ^"."^ memberName ^", got "^string_of_typ name))
+      | CircleStructConstruct(structName, memberName, _) -> 
+        let sd = struct_decl (string_of_typ (type_of_identifier structName)) in
+        let ss = List.fold_left (fun m (t, n) -> StringMap.add n t m)
+          StringMap.empty (sd.members)
+        in
+        let name =  type_of_identifier_s memberName ss structName in
+        if(name=Circle) then Circle
+          else raise(Failure ("Excepted type circle for "^ structName ^"."^ memberName ^", got "^string_of_typ name))
       | WallConstruct(n, actuals) -> let name = type_of_identifier n and f = List.map expr actuals in
       if (List.length f==2) then 
-        if(List.for_all(isNumType) f)&&(name=Wall) then Wall
-        else raise (Failure ("expected numeric input for Wall"))
-      else raise(Failure("Wrong number of parameters for Wall"))
+        if(List.for_all(isNumType) f)then
+          if(name=Wall) then Wall
+          else raise(Failure ("wrong type " ^ string_of_typ name ^" for wall"))
+        else raise (Failure ("expected numeric input for wall"))
+      else raise(Failure("Wrong number of parameters for wall"))
 
       | BedConstruct(n, actuals) -> let name = type_of_identifier n and f = List.map expr actuals in
       if (List.length f==2) then
-        if (List.for_all(isNumType) f)&&(name=Bed) then Bed
-        else raise (Failure ("expected numeric input for Bed"))
-      else raise(Failure("Wrong number of parameters for Bed"))
+        if (List.for_all(isNumType) f)then
+          if(name=Bed) then Bed
+          else raise(Failure ("wrong type " ^ string_of_typ name ^" for bed"))
+        else raise (Failure ("expected numeric input for bed"))
+      else raise(Failure("Wrong number of parameters for bed"))
       
       | DeskConstruct(n, actuals) -> let name = type_of_identifier n and f = List.map expr actuals in
       if (List.length f==2) then
-        if (List.for_all(isNumType) f)&&(name=Desk) then Desk
-        else raise (Failure ("expected numeric input for Desk"))
-      else raise(Failure("Wrong number of parameters for Desk"))
+        if (List.for_all(isNumType) f) then 
+          if(name=Desk) then Desk
+          else raise(Failure ("wrong type " ^ string_of_typ name ^" for desk"))
+        else raise (Failure ("expected numeric input for desk"))
+      else raise(Failure("Wrong number of parameters for desk"))
 
       | DoorConstruct(n, actuals) -> let name = type_of_identifier n and f = List.map expr actuals in
       if (List.length f==2) then
-        if (List.for_all(isNumType) f)&&(name=Door) then Door
-        else raise (Failure ("expected numeric input for Door"))
-      else raise(Failure("Wrong number of parameters for Door"))
+        if (List.for_all(isNumType) f) then
+          if(name=Door) then Door
+          else raise(Failure ("wrong type " ^ string_of_typ name ^" for door"))
+        else raise (Failure ("expected numeric input for door"))
+      else raise(Failure("Wrong number of parameters for door"))
 
       | WindowConstruct(n, actuals) -> let name = type_of_identifier n and f = List.map expr actuals in
       if (List.length f==2) then
-        if (List.for_all(isNumType) f)&&(name=Window) then Window
-        else raise (Failure ("expected numeric input for Window"))
-      else raise(Failure("Wrong number of parameters for Window"))
+        if (List.for_all(isNumType) f) then
+          if(name=Window) then Window
+          else raise(Failure ("wrong type " ^ string_of_typ name ^" for window"))
+        else raise (Failure ("expected numeric input for window"))
+      else raise(Failure("Wrong number of parameters for window"))
 
       | RectangleConstruct(n, actuals) -> let name = type_of_identifier n and f = List.map expr actuals in
       if (List.length f==2) then
-        if (List.for_all(isNumType) f)&&(name=Rectangle) then Rectangle
-        else raise (Failure ("expected numeric input for Rectangle"))
-      else raise(Failure("Wrong number of parameters for Rectangle"))
+        if (List.for_all(isNumType) f) then
+          if(name=Rectangle) then Rectangle
+          else raise(Failure ("wrong type " ^ string_of_typ name ^" for rectangle"))
+        else raise (Failure ("expected numeric input for rectangle"))
+      else raise(Failure("Wrong number of parameters for rectangle"))
 
       | CircleConstruct(n, actuals) -> let name = type_of_identifier n and f = List.map expr actuals in
       if (List.length f==3) then
-        if (List.for_all(isNumType) f)&&(name=Circle) then Circle
-        else raise (Failure ("expected numeric input for Circle"))
-      else raise(Failure("Wrong number of parameters for Circle"))
+        if (List.for_all(isNumType) f)then
+          if(name=Circle) then Circle
+          else raise(Failure ("wrong type " ^ string_of_typ name ^" for circle"))
+        else raise (Failure ("expected numeric input for circle"))
+      else raise(Failure("Wrong number of parameters for circle"))
 
       | Binop(e1, op, e2) as e -> let t1 = expr e1 and t2 = expr e2 in
 	(match op with
