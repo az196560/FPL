@@ -51,6 +51,7 @@ let translate program =
   in
 
   (* debug helper *)
+  (*
   let rec getMap map = function
     [] -> map
     | pair::pairs -> getMap (StringMap.add (snd pair) (fst pair) map) pairs in
@@ -66,6 +67,7 @@ let translate program =
     
   let printStructMemberMap m =
      StringMap.iter (fun key value -> Printf.printf "%s: " key;  printStringList value) m in
+  *)
 
     (* Declare ensureInt and ensureFloat function *)
   let ensureInt c = 
