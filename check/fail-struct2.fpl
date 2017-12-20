@@ -1,3 +1,4 @@
+/* Author: Yipeng Zhou */
 struct Kitchen {
     wall a;
     bed  b;

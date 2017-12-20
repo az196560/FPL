@@ -1,4 +1,4 @@
-(* Author: Xinwei Zhang *)
+(* Author: Xinwei Zhang, Yipeng Zhou *)
 (* Ocamllex scanner for Fpl *)
 
 { open Parser }

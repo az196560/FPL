@@ -1,4 +1,4 @@
-/* Author: Xinwei Zhang */
+/* Author: Xinwei Zhang, Yipeng Zhou */
 /* Ocamlyacc parser for Fpl */
 
 %{
