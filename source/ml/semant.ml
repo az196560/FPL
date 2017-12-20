@@ -1,3 +1,4 @@
+(* Author: Xinwei Zhang *)
 (* Semantic checking for the Fpl compiler *)
 
 open Ast

@@ -1,3 +1,4 @@
+/* Author: Xinwei Zhang */
 /* user-defined struct Toilet*/
 struct Toilet {
     circle c0;

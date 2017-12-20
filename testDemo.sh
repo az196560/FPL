@@ -1,3 +1,4 @@
+# Author: Xinwei Zhang
 #!/bin/sh
 
 # Regression testing script for Fpl
