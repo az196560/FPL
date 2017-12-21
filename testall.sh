@@ -1,3 +1,4 @@
+# Author: Chih-Hung Lu
 #!/bin/sh
 
 # Regression testing script for Fpl

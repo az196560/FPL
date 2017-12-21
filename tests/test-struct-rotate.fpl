@@ -1,3 +1,4 @@
+/* Author: Chih-Hung Lu */
 struct Room {
     wall a;
     bed  b;

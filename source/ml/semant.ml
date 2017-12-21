@@ -1,4 +1,4 @@
-(* Author: Yipeng Zhou, Xinwei Zhang *)
+(* Author: Yipeng Zhou, Xinwei Zhang, Chih-Hung Lu *)
 (* Semantic checking for the Fpl compiler *)
 
 open Ast

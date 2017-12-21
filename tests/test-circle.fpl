@@ -1,3 +1,4 @@
+/* Author: Chih-Hung Lu */
 int main()
 {
   circle a;

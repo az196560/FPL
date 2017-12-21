@@ -1,3 +1,4 @@
+/* Author: Chih-Hung Lu */
 struct Kitchen {
     wall a;
     bed  b;

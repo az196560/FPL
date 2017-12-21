@@ -1,5 +1,7 @@
-/*
+/* 
+ * Author: Chih-Hung Lu 
  * Here we gonna draw a FPL using openGL with spiritual style ~~~~~~~~~~~!!!!!!!!!!!@@@@@@@@@@############# 
+ * 
  */
 
 #include <stdio.h>
