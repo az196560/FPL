@@ -1,4 +1,4 @@
-(* Author: Yipeng Zhou, Xinwei Zhang, Chih-Hung Lu *)
+(* Author: Yipeng Zhou, Xinwei Zhang, Chih-Hung Lu, Dongdong She*)
 (* Code generation: translate takes a semantically checked AST and
 produces LLVM IR
 
