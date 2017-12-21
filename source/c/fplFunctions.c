@@ -1,5 +1,5 @@
 /* 
- * Author: Chih-Hung Lu 
+ * Author: Chih-Hung Lu Dongdong She
  * Here we gonna draw a FPL using openGL with spiritual style ~~~~~~~~~~~!!!!!!!!!!!@@@@@@@@@@############# 
  * 
  */
